@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#faf8f3" id="theme-color-meta" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Lexicon" />
+<meta name="description" content="Your personal reading and notes companion" />
+<title>Lexicon</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark" disabled>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{fontFamily:{serif:['Lora','Georgia','serif'],sans:['DM Sans','system-ui','sans-serif'],mono:['JetBrains Mono','Consolas','monospace']}}}}</script>
+
+<script type="importmap">{"imports":{"react":"https://esm.sh/react@18.3.1","react-dom/client":"https://esm.sh/react-dom@18.3.1/client"}}</script>
+
+<style>
+/* ── CSS DESIGN TOKENS ──────────────────────────────────── */
+:root {
+  --font-serif:'Lora',Georgia,serif; --font-sans:'DM Sans',system-ui,sans-serif; --font-mono:'JetBrains Mono',Consolas,monospace;
+  --bg:#faf8f3; --surface:#ffffff; --surface2:#f5f0e5; --border:#e8e0d0;
+  --text:#1e1710; --text2:#6b5f52; --text3:#9a8a7a;
+  --accent:#c17a35; --accent-light:#f5e9d9; --accent-text:#7d4e10;
+  --btn-primary-bg:#1e1710; --btn-primary-text:#faf8f3;
+  --btn-ghost-hover:#e8e0d0;
+  --input-bg:#f0ebe0;
+  --danger:#ef4444; --danger-light:rgba(239,68,68,0.12);
+  --success:#22c55e; --success-light:rgba(34,197,94,0.12);
+  --overlay:rgba(0,0,0,0.45);
+  --nav-h:64px; --safe-bottom:env(safe-area-inset-bottom,0px); --safe-top:env(safe-area-inset-top,0px);
+}
+.theme-sepia {
+  --bg:#f5efe0; --surface:#fdf6e4; --surface2:#ede5cc; --border:#ddd0b3;
+  --text:#4a3728; --text2:#7a6048; --text3:#a08060;
+  --accent:#a0622a; --accent-light:#ede0c8; --accent-text:#6b3d12;
+  --btn-primary-bg:#4a3728; --btn-primary-text:#fdf6e4;
+  --btn-ghost-hover:#ddd0b3;
+  --input-bg:#ece5d0;
+}
+.theme-dark {
+  --bg:#141210; --surface:#1e1b17; --surface2:#252118; --border:#2e2a24;
+  --text:#e8ddd0; --text2:#9a8878; --text3:#6a5a4e;
+  --accent:#d4894a; --accent-light:#2e2318; --accent-text:#d4894a;
+  --btn-primary-bg:#e8ddd0; --btn-primary-text:#141210;
+  --btn-ghost-hover:#2e2a24;
+  --input-bg:#252118;
+  --danger:#f87171; --danger-light:rgba(248,113,113,0.15);
+  --success:#4ade80; --success-light:rgba(74,222,128,0.15);
+}
+
+/* ── BASE ───────────────────────────────────────────────── */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);margin:0;}
+#root{height:100%;display:flex;flex-direction:column;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* ── ANIMATIONS ─────────────────────────────────────────── */
+.slide-enter{animation:slideIn 0.28s cubic-bezier(0.4,0,0.2,1) both;}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.fade-in{animation:fadeIn 0.2s ease both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── PROSE ──────────────────────────────────────────────── */
+.prose{font-family:var(--font-serif);color:var(--text);line-height:1.8;}
+.prose h1{font-size:1.7em;font-weight:700;margin:1.4em 0 0.5em;border-bottom:1px solid var(--border);padding-bottom:0.3em;}
+.prose h2{font-size:1.4em;font-weight:600;margin:1.3em 0 0.4em;}
+.prose h3{font-size:1.15em;font-weight:600;margin:1.1em 0 0.3em;}
+.prose h4{font-size:1em;font-weight:700;margin:1em 0 0.3em;}
+.prose p{margin:0.8em 0;}
+.prose strong{font-weight:700;}
+.prose em{font-style:italic;}
+.prose del{text-decoration:line-through;opacity:0.7;}
+.prose a{color:var(--accent);text-decoration:underline;text-underline-offset:3px;}
+.prose code{background:var(--surface2);padding:0.15em 0.45em;border-radius:5px;font-family:var(--font-mono);font-size:0.83em;color:var(--text);}
+.prose pre{background:#1a1a2e;padding:1.1em 1.3em;border-radius:10px;overflow-x:auto;margin:1.1em 0;position:relative;-webkit-overflow-scrolling:touch;}
+.prose pre code{background:none;padding:0;color:#e2e8f0;font-size:0.88em;line-height:1.6;}
+.prose blockquote{border-left:3px solid var(--accent);padding:0.6em 1em 0.6em 1.2em;margin:1.2em 0;font-style:italic;opacity:0.9;background:var(--accent-light);border-radius:0 8px 8px 0;}
+.prose ul{list-style:none;padding-left:1.2em;margin:0.8em 0;}
+.prose ul li::before{content:'•';color:var(--accent);font-weight:700;margin-right:0.5em;margin-left:-1.1em;}
+.prose ol{list-style:decimal;padding-left:1.5em;margin:0.8em 0;}
+.prose li{margin:0.35em 0;line-height:1.75;}
+.prose li ul,.prose li ol{margin:0.2em 0;}
+.prose .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:1.2em 0;border-radius:8px;border:1px solid var(--border);}
+.prose table{width:100%;border-collapse:collapse;font-size:0.9em;margin:0;}
+.prose th{border-bottom:2px solid var(--border);padding:0.55em 0.8em;text-align:left;font-weight:600;background:var(--accent-light);white-space:nowrap;color:var(--text);}
+.prose td{border-bottom:1px solid var(--border);padding:0.5em 0.8em;color:var(--text);}
+.prose tr:last-child td{border-bottom:none;}
+.prose tr:nth-child(even) td{background:rgba(128,128,128,0.06);}
+.prose hr{border:none;border-top:1px solid var(--border);margin:2em 0;}
+.prose img{max-width:100%;border-radius:10px;margin:1.2em auto;display:block;box-shadow:0 2px 12px rgba(0,0,0,0.15);}
+.prose input[type="checkbox"]{margin-right:0.5em;accent-color:var(--accent);width:1em;height:1em;}
+.prose li:has(input[type="checkbox"]){list-style:none;margin-left:-1.2em;}
+.prose li:has(input[type="checkbox"])::before{content:none;}
+.katex{font-size:1.1em !important;}
+.katex-display{overflow-x:auto;margin:1em 0;}
+
+/* ── EDITOR ─────────────────────────────────────────────── */
+.editor-area{font-family:var(--font-mono);resize:none;outline:none;line-height:1.7;color:var(--text);}
+.editor-toolbar-btn{padding:5px 9px;border-radius:6px;font-size:13px;cursor:pointer;transition:background 0.15s;color:var(--text);background:transparent;border:none;}
+.editor-toolbar-btn:hover{background:var(--btn-ghost-hover);}
+.editor-toolbar-btn:active{background:var(--border);}
+.toolbar-wrap{position:relative;}
+.toolbar-wrap::after{content:'';position:absolute;right:0;top:0;bottom:0;width:28px;background:linear-gradient(to right,transparent,var(--surface));pointer-events:none;}
+
+/* ── CODE COPY BUTTON ───────────────────────────────────── */
+.code-copy-btn{position:absolute;top:8px;right:8px;padding:3px 10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:5px;color:#aaa;font-size:11px;cursor:pointer;font-family:var(--font-sans);}
+.code-copy-btn:hover{background:rgba(255,255,255,0.2);color:#fff;}
+
+/* ── UTILITIES ──────────────────────────────────────────── */
+.hide-scrollbar{scrollbar-width:none;-ms-overflow-style:none;}
+.hide-scrollbar::-webkit-scrollbar{display:none;}
+.safe-top{padding-top:max(16px,env(safe-area-inset-top,0px));}
+.surface{background:var(--surface);border:1px solid var(--border);}
+
+/* ── SEARCH HIGHLIGHT ───────────────────────────────────── */
+mark{background:rgba(251,191,36,0.35);color:var(--text);border-radius:2px;padding:0 2px;}
+
+/* ── BOTTOM NAV ─────────────────────────────────────────── */
+.bottom-nav{height:calc(var(--nav-h) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:var(--surface);border-top:1px solid var(--border);}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 0;cursor:pointer;transition:color 0.15s;border:none;background:none;color:var(--text2);font-size:10px;font-family:var(--font-sans);font-weight:500;}
+.nav-btn.active{color:var(--accent);}
+.nav-btn-new{flex:1;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:none;}
+
+/* ── READER FAB ─────────────────────────────────────────── */
+.reader-fab{position:fixed;bottom:0;left:0;right:0;z-index:40;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);}
+.reader-fab.fab-hidden{transform:translateY(100%);}
+.reader-fab-inner{display:flex;align-items:center;justify-content:space-around;padding:10px 8px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--border);}
+.fab-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 10px;border-radius:12px;border:none;background:none;color:var(--text2);font-size:10px;font-family:var(--font-sans);font-weight:500;cursor:pointer;transition:color 0.15s,background 0.15s;min-width:52px;}
+.fab-btn:active{background:var(--btn-ghost-hover);}
+.fab-btn.fab-accent{color:var(--accent);}
+.fab-center-btn{background:var(--accent);border:none;color:white;border-radius:16px;padding:10px 24px;font-size:13px;font-weight:600;font-family:var(--font-sans);cursor:pointer;box-shadow:0 4px 14px rgba(193,122,53,0.35);display:flex;align-items:center;gap:8px;transition:opacity 0.15s,transform 0.15s;}
+.fab-center-btn:active{opacity:0.85;transform:scale(0.97);}
+
+/* ── READER HEADER ──────────────────────────────────────── */
+.reader-header{transition:transform 0.3s cubic-bezier(0.4,0,0.2,1),opacity 0.25s;position:sticky;top:0;z-index:30;}
+.reader-header.immersive{transform:translateY(-100%);opacity:0;pointer-events:none;margin-bottom:-64px;}
+
+/* ── BOTTOM SHEET ───────────────────────────────────────── */
+.sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:60;}
+.sheet{position:fixed;bottom:0;left:0;right:0;z-index:61;border-radius:20px 20px 0 0;background:var(--surface);border-top:1px solid var(--border);padding-bottom:max(24px,env(safe-area-inset-bottom));animation:sheetUp 0.28s cubic-bezier(0.4,0,0.2,1) both;max-height:78vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:36px;height:4px;border-radius:4px;background:var(--border);margin:12px auto 16px;flex-shrink:0;}
+
+/* ── TOC ────────────────────────────────────────────────── */
+.toc-item{display:flex;align-items:center;gap:10px;padding:11px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s;-webkit-tap-highlight-color:transparent;}
+.toc-item:last-child{border-bottom:none;}
+.toc-item:active{background:var(--surface2);}
+.toc-h1{font-weight:700;font-size:15px;color:var(--text);}
+.toc-h2{padding-left:30px;font-size:14px;font-weight:600;color:var(--text);}
+.toc-h3{padding-left:46px;font-size:13px;font-weight:500;color:var(--text2);}
+.toc-h4,.toc-h5,.toc-h6{padding-left:60px;font-size:12px;color:var(--text2);}
+
+/* ── MODAL ──────────────────────────────────────────────── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:80;display:flex;align-items:flex-end;}
+.modal-sheet{width:100%;background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px;padding-bottom:max(28px,env(safe-area-inset-bottom));animation:sheetUp 0.25s cubic-bezier(0.4,0,0.2,1) both;}
+
+/* ── APPEARANCE PICKER ──────────────────────────────────── */
+.appear-chip{flex:1;padding:10px 6px;border-radius:12px;border:2px solid transparent;font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:all 0.15s;font-family:var(--font-sans);}
+.appear-chip.selected{border-color:var(--accent);box-shadow:0 0 0 2px rgba(193,122,53,0.25);}
+.range-row{display:flex;align-items:center;gap:12px;background:var(--surface2);border-radius:12px;padding:8px 16px;margin-bottom:20px;}
+.range-btn{font-size:18px;font-weight:700;color:var(--text);background:none;border:none;cursor:pointer;padding:4px 8px;line-height:1;}
+.range-val{flex:1;text-align:center;font-size:14px;font-weight:600;color:var(--text);font-family:var(--font-mono);}
+
+/* ── INPUT BASE ─────────────────────────────────────────── */
+.inp{width:100%;background:var(--input-bg);color:var(--text);border:1px solid var(--border);border-radius:12px;outline:none;font-family:var(--font-sans);}
+.inp::placeholder{color:var(--text3);}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(193,122,53,0.2);}
+
+/* ── SECTION LABEL ──────────────────────────────────────── */
+.sec-label{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);margin-bottom:8px;font-family:var(--font-sans);}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" crossorigin="anonymous"></script>
+<script type="module">
+// ── INDEXEDDB ────────────────────────────────────────────────
+const DB={_db:null,
+  async open(){if(this._db)return this._db;return new Promise((res,rej)=>{const r=indexedDB.open('lexicon_db',1);r.onupgradeneeded=e=>{try{e.target.result.createObjectStore('kv');}catch(_){}};r.onsuccess=e=>{this._db=e.target.result;res(this._db);};r.onerror=()=>rej(r.error);});},
+  async get(key){try{const db=await this.open();return new Promise(res=>{const r=db.transaction('kv').objectStore('kv').get(key);r.onsuccess=()=>res(r.result??null);r.onerror=()=>res(null);});}catch{return null;}},
+  async set(key,val){try{const db=await this.open();return new Promise(res=>{const r=db.transaction('kv','readwrite').objectStore('kv').put(val,key);r.onsuccess=()=>res(true);r.onerror=()=>res(false);});}catch{return false;}}
+};
+
+// ── SCROLL POSITION STORE (module-level, survives view unmounts) ──
+// Key: view-specific string → value: scrollTop
+const _scrollPos = new Map();
+
+// ── IMPORTS ──────────────────────────────────────────────────
+import{useState,useEffect,useReducer,useMemo,useCallback,useRef,memo,createContext,useContext}from'react';
+import{createRoot}from'react-dom/client';
+import*as React from'react';
+
+// ── CDN LOADER ───────────────────────────────────────────────
+const _loaded={};
+function loadScript(src,g){if(_loaded[src])return Promise.resolve(window[g]);return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.crossOrigin='anonymous';s.onload=()=>{_loaded[src]=true;res(window[g]);};s.onerror=rej;document.head.appendChild(s);});}
+let MARKED_READY=false,KATEX_READY=false,PURIFY_READY=false;
+async function initLibs(){await Promise.all([loadScript('https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js','marked'),loadScript('https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js','katex'),loadScript('https://cdn.jsdelivr.net/npm/dompurify@3.1.5/dist/purify.min.js','DOMPurify')]);setupMarked();MARKED_READY=true;KATEX_READY=true;PURIFY_READY=true;}
+
+// ── MARKED SETUP (v12 token API) ────────────────────────────
+let _seenIds={};
+function setupMarked(){
+  const R=new window.marked.Renderer();
+  R.code=function(t,la){
+    const text=t&&typeof t==='object'?(t.text??''):String(t??'');
+    const lang=t&&typeof t==='object'?(t.lang??''):(la??'');
+    const language=lang?lang.split(/\s/)[0]:'';
+    let hl=escHtml(text);
+    try{if(language&&window.hljs?.getLanguage(language))hl=window.hljs.highlight(text,{language}).value;else if(window.hljs)hl=window.hljs.highlightAuto(text).value;}catch(_){}
+    const ll=language?`<span style="position:absolute;top:8px;right:65px;font-size:10px;color:#888;font-family:var(--font-mono);text-transform:uppercase;pointer-events:none;">${escHtml(language)}</span>`:'';
+    return `<div style="position:relative;margin:1.1em 0;"><pre style="background:#1a1a2e;padding:1.1em 1.3em;border-radius:10px;overflow-x:auto;margin:0;"><code class="hljs ${escHtml(language)}" style="background:none;padding:0;font-size:0.88em;line-height:1.6;">${hl}</code></pre>${ll}<button class="code-copy-btn" onclick="(function(b){var c=b.closest('div').querySelector('code');navigator.clipboard&&navigator.clipboard.writeText(c.textContent).then(function(){b.textContent='Copied!';setTimeout(function(){b.textContent='Copy'},1500)}).catch(function(){});})(this)">Copy</button></div>`;
+  };
+  R.heading=function(t,la){
+    const raw=t&&typeof t==='object'?(t.text??''):String(t??'');
+    const lv=t&&typeof t==='object'?(t.depth??1):(la??1);
+    const clean=raw.replace(/<[^>]+>/g,'');
+    let base=clean.toLowerCase().replace(/[^\w\s-]+/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-+|-+$/g,'')||'h';
+    if(/^\d/.test(base))base='h-'+base;
+    _seenIds[base]=(_seenIds[base]||0)+1;
+    const id=_seenIds[base]>1?`${base}-${_seenIds[base]}`:base;
+    return `<h${lv} id="${id}">${raw}</h${lv}>`;
+  };
+  R.table=function(t,b){
+    if(typeof t==='string')return`<div class="table-wrap"><table><thead>${t}</thead><tbody>${b}</tbody></table></div>`;
+    const{header=[],rows=[],align=[]}=t||{};
+    const th='<tr>'+header.map((c,i)=>`<th${align[i]?` style="text-align:${align[i]}"`:''}>` +(c.text??'')+'</th>').join('')+'</tr>';
+    const tb=rows.map(r=>'<tr>'+r.map((c,i)=>`<td${align[i]?` style="text-align:${align[i]}"`:''}>` +(c.text??'')+'</td>').join('')+'</tr>').join('');
+    return`<div class="table-wrap"><table><thead>${th}</thead><tbody>${tb}</tbody></table></div>`;
+  };
+  R.checkbox=function(t){const c=t&&typeof t==='object'?!!t.checked:!!t;return`<input type="checkbox" ${c?'checked':''} disabled style="cursor:default;margin-right:0.4em;"> `;};
+  window.marked.use({renderer:R,gfm:true,breaks:true});
+}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function renderMarkdown(text){
+  if(!MARKED_READY||!text)return text||'';
+  _seenIds={};
+  const store=[];
+  let p=text
+    .replace(/\$\$[\s\S]+?\$\$/g,m=>{store.push({d:true,s:m.slice(2,-2)});return`%%M${store.length-1}%%`;})
+    .replace(/\$[^\n$]+?\$/g,m=>{store.push({d:false,s:m.slice(1,-1)});return`%%I${store.length-1}%%`;})
+    .replace(/\\\[[\s\S]+?\\\]/g,m=>{store.push({d:true,s:m.slice(2,-2)});return`%%M${store.length-1}%%`;})
+    .replace(/\\\([\s\S]+?\\\)/g,m=>{store.push({d:false,s:m.slice(2,-2)});return`%%I${store.length-1}%%`;});
+  let html=window.marked.parse(p);
+  if(KATEX_READY){
+    html=html
+      .replace(/%%M(\d+)%%/g,(_,i)=>{try{return window.katex.renderToString(store[+i].s,{displayMode:true,throwOnError:false});}catch{return store[+i].s;}})
+      .replace(/%%I(\d+)%%/g,(_,i)=>{try{return window.katex.renderToString(store[+i].s,{displayMode:false,throwOnError:false});}catch{return store[+i].s;}});
+  }
+  if(PURIFY_READY){
+    html=window.DOMPurify.sanitize(html,{ADD_TAGS:['math','annotation','semantics','mrow','mi','mn','mo','mfrac','msup','msub','msqrt','mspace','mtext','mover','munder'],ADD_ATTR:['encoding','class','style','id','aria-hidden','focusable'],FORCE_BODY:false});
+    html=html.replace(/(<button class="code-copy-btn")[^>]*>/g,`$1 onclick="(function(b){var c=b.closest('div').querySelector('code');navigator.clipboard&&navigator.clipboard.writeText(c.textContent).then(function(){b.textContent='Copied!';setTimeout(function(){b.textContent='Copy'},1500)}).catch(function(){});})(this)">`);
+  }
+  return html;
+}
+
+// ── CONSTANTS ────────────────────────────────────────────────
+const IDB_KEY='lexicon_state_v3';
+const IDB_SCROLL='lexicon_scroll_v1';
+const SORT_OPTIONS=[{id:'modified',label:'Last Modified'},{id:'created',label:'Date Created'},{id:'name',label:'Name A–Z'},{id:'words',label:'Reading Time'}];
+
+// Collection palette — vivid, clearly distinct in all three themes
+const COL_PALETTES=[
+  {l:{bg:'#fef3c7',bd:'#f59e0b',tx:'#78350f'},d:{bg:'#2d1f00',bd:'#b45309',tx:'#fcd34d'}},  // amber
+  {l:{bg:'#dbeafe',bd:'#3b82f6',tx:'#1e3a8a'},d:{bg:'#0c1a3a',bd:'#1d4ed8',tx:'#93c5fd'}},  // blue
+  {l:{bg:'#fce7f3',bd:'#ec4899',tx:'#831843'},d:{bg:'#2d0a1e',bd:'#be185d',tx:'#f9a8d4'}},  // pink
+  {l:{bg:'#d1fae5',bd:'#10b981',tx:'#064e3b'},d:{bg:'#022c1e',bd:'#047857',tx:'#6ee7b7'}},  // emerald
+  {l:{bg:'#ede9fe',bd:'#8b5cf6',tx:'#4c1d95'},d:{bg:'#1a0a3d',bd:'#6d28d9',tx:'#c4b5fd'}},  // violet
+  {l:{bg:'#ffedd5',bd:'#f97316',tx:'#7c2d12'},d:{bg:'#2d1200',bd:'#c2410c',tx:'#fdba74'}},  // orange
+];
+function colColors(colorIdx,idx,theme){
+  // Use colorIdx if valid, fall back to position index so each card always has a unique color
+  const i=(typeof colorIdx==='number'?colorIdx:idx)%COL_PALETTES.length;
+  const p=COL_PALETTES[i];return theme==='dark'?p.d:p.l;
+}
+
+function getWordCount(t){
+  if(!t)return 0;
+  const s=t.replace(/```[\s\S]*?```/g,' ').replace(/`[^`\n]+`/g,' ').replace(/\[([^\]]*)\]\([^)]*\)/g,'$1').replace(/[#*_~>|^`\[\]()]/g,' ').replace(/\s+/g,' ').trim();
+  return s?s.split(/\s+/).filter(Boolean).length:0;
+}
+function getReadTime(t){const w=getWordCount(t);const m=Math.ceil(w/238);return{words:w,mins:Math.max(w>0?1:0,m)};}
+function fmtDate(ts){if(!ts)return'';const d=new Date(ts),now=new Date(),diff=now-d;if(diff<60000)return'just now';if(diff<3600000)return`${Math.floor(diff/60000)}m ago`;if(diff<86400000)return`${Math.floor(diff/3600000)}h ago`;if(diff<604800000)return`${Math.floor(diff/86400000)}d ago`;if(d.getFullYear()===now.getFullYear())return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,9);}
+
+// ── STATE ────────────────────────────────────────────────────
+const defaultState={
+  navStack:[{view:'dashboard',params:{}}],
+  collections:[{id:'c1',name:'General',colorIdx:0},{id:'c2',name:'Work',colorIdx:1}],
+  folders:[],notes:[],
+  theme:'light',fontSize:18,fontFamily:'serif',sortBy:'modified',
+};
+
+function reducer(state,action){
+  switch(action.type){
+    case'NAVIGATE':return{...state,navStack:[...state.navStack,action.payload]};
+    case'BACK':return state.navStack.length<=1?state:{...state,navStack:state.navStack.slice(0,-1)};
+    case'RESET_NAV':return{...state,navStack:[{view:'dashboard',params:{}}]};
+    case'CREATE_COLLECTION':{const nc={id:genId(),name:action.name,colorIdx:state.collections.length%COL_PALETTES.length};return{...state,collections:[...state.collections,nc]};}
+    case'UPDATE_COLLECTION':return{...state,collections:state.collections.map(c=>c.id===action.id?{...c,...action.patch}:c)};
+    case'DELETE_COLLECTION':return{...state,collections:state.collections.filter(c=>c.id!==action.id),folders:state.folders.filter(f=>f.collectionId!==action.id),notes:state.notes.filter(n=>n.collectionId!==action.id)};
+    case'CREATE_FOLDER':{const nf={id:genId(),name:action.name,collectionId:action.collectionId,createdAt:Date.now()};return{...state,folders:[...state.folders,nf]};}
+    case'UPDATE_FOLDER':return{...state,folders:state.folders.map(f=>f.id===action.id?{...f,...action.patch}:f)};
+    case'DELETE_FOLDER':return{...state,folders:state.folders.filter(f=>f.id!==action.id),notes:state.notes.map(n=>n.folderId===action.id?{...n,folderId:undefined}:n)};
+    case'CREATE_NOTE':{const nn={id:genId(),title:action.title,content:action.content,collectionId:action.collectionId,folderId:action.folderId||undefined,createdAt:Date.now(),modifiedAt:Date.now()};return{...state,notes:[nn,...state.notes]};}
+    case'UPDATE_NOTE':return{...state,notes:state.notes.map(n=>n.id===action.id?{...n,title:action.title??n.title,content:action.content??n.content,modifiedAt:Date.now()}:n)};
+    case'DELETE_NOTE':return{...state,notes:state.notes.filter(n=>n.id!==action.id)};
+    case'RESTORE_NOTE':if(state.notes.find(n=>n.id===action.note.id))return state;return{...state,notes:[action.note,...state.notes]};
+    case'OPEN_NOTE':return{...state,notes:state.notes.map(n=>n.id===action.id?{...n,lastOpenedAt:Date.now()}:n)};
+    case'SET':return{...state,...action.payload};
+    case'HYDRATE':return{...defaultState,...action.data,navStack:[{view:'dashboard',params:{}}]};
+    case'IMPORT':{
+      const{collections=[],folders=[],notes=[]}=action.data;
+      const mi=(ex,inc)=>{const m={};ex.forEach(i=>m[i.id]=i);inc.forEach(i=>m[i.id]=i);return Object.values(m);};
+      const mc=mi(state.collections,collections);
+      const mf=mi(state.folders,folders);
+      const vids=new Set(mc.map(c=>c.id));
+      const mn=mi(state.notes,notes).filter(n=>vids.has(n.collectionId));
+      return{...state,collections:mc,folders:mf,notes:mn};
+    }
+    default:return state;
+  }
+}
+
+// ── HOOKS ────────────────────────────────────────────────────
+function useDebounce(v,ms){const[d,setD]=useState(v);useEffect(()=>{const t=setTimeout(()=>setD(v),ms);return()=>clearTimeout(t);},[v,ms]);return d;}
+function useOutsideClick(ref,cb){useEffect(()=>{const h=e=>{if(ref.current&&!ref.current.contains(e.target))cb();};document.addEventListener('mousedown',h);document.addEventListener('touchstart',h,{passive:true});return()=>{document.removeEventListener('mousedown',h);document.removeEventListener('touchstart',h);};},[ref,cb]);}
+
+// ── CONTEXT ──────────────────────────────────────────────────
+const AppCtx=createContext(null);
+function useApp(){return useContext(AppCtx);}
+
+// ── ICONS ────────────────────────────────────────────────────
+const sv=(p,paths)=>React.createElement('svg',{width:p.s||20,height:p.s||20,viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round',className:p.className,style:p.style},paths);
+const IC={
+  Back:   p=>sv(p,[React.createElement('polyline',{key:0,points:'15 18 9 12 15 6'})]),
+  Search: p=>sv(p,[React.createElement('circle',{key:0,cx:11,cy:11,r:8}),React.createElement('line',{key:1,x1:21,y1:21,x2:16.65,y2:16.65})]),
+  Plus:   p=>sv(p,[React.createElement('line',{key:0,x1:12,y1:5,x2:12,y2:19}),React.createElement('line',{key:1,x1:5,y1:12,x2:19,y2:12})]),
+  Settings:p=>sv(p,[React.createElement('circle',{key:0,cx:12,cy:12,r:3}),React.createElement('path',{key:1,d:'M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z'})]),
+  Book:   p=>sv(p,[React.createElement('path',{key:0,d:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20'}),React.createElement('path',{key:1,d:'M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z'})]),
+  Folder: p=>sv(p,[React.createElement('path',{key:0,d:'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z'})]),
+  File:   p=>sv(p,[React.createElement('path',{key:0,d:'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'}),React.createElement('polyline',{key:1,points:'14 2 14 8 20 8'})]),
+  Trash:  p=>sv(p,[React.createElement('polyline',{key:0,points:'3 6 5 6 21 6'}),React.createElement('path',{key:1,d:'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2'})]),
+  Edit:   p=>sv(p,[React.createElement('path',{key:0,d:'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7'}),React.createElement('path',{key:1,d:'M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z'})]),
+  X:      p=>sv(p,[React.createElement('line',{key:0,x1:18,y1:6,x2:6,y2:18}),React.createElement('line',{key:1,x1:6,y1:6,x2:18,y2:18})]),
+  Check:  p=>sv(p,[React.createElement('polyline',{key:0,points:'20 6 9 17 4 12'})]),
+  Download:p=>sv(p,[React.createElement('path',{key:0,d:'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'}),React.createElement('polyline',{key:1,points:'7 10 12 15 17 10'}),React.createElement('line',{key:2,x1:12,y1:15,x2:12,y2:3})]),
+  Upload: p=>sv(p,[React.createElement('path',{key:0,d:'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'}),React.createElement('polyline',{key:1,points:'17 8 12 3 7 8'}),React.createElement('line',{key:2,x1:12,y1:3,x2:12,y2:15})]),
+  Sort:   p=>sv(p,[React.createElement('line',{key:0,x1:3,y1:6,x2:21,y2:6}),React.createElement('line',{key:1,x1:3,y1:12,x2:15,y2:12}),React.createElement('line',{key:2,x1:3,y1:18,x2:9,y2:18})]),
+  FolderPlus:p=>sv(p,[React.createElement('path',{key:0,d:'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z'}),React.createElement('line',{key:1,x1:12,y1:11,x2:12,y2:17}),React.createElement('line',{key:2,x1:9,y1:14,x2:15,y2:14})]),
+  Type:   p=>sv(p,[React.createElement('polyline',{key:0,points:'4 7 4 4 20 4 20 7'}),React.createElement('line',{key:1,x1:9,y1:20,x2:15,y2:20}),React.createElement('line',{key:2,x1:12,y1:4,x2:12,y2:20})]),
+  Eye:    p=>sv(p,[React.createElement('path',{key:0,d:'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'}),React.createElement('circle',{key:1,cx:12,cy:12,r:3})]),
+  Clock:  p=>sv(p,[React.createElement('circle',{key:0,cx:12,cy:12,r:10}),React.createElement('polyline',{key:1,points:'12 6 12 12 16 14'})]),
+  Words:  p=>sv(p,[React.createElement('path',{key:0,d:'M4 6h16M4 10h16M4 14h10'})]),
+  Save:   p=>sv(p,[React.createElement('path',{key:0,d:'M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z'}),React.createElement('polyline',{key:1,points:'17 21 17 13 7 13 7 21'}),React.createElement('polyline',{key:2,points:'7 3 7 8 15 8'})]),
+  Copy:   p=>sv(p,[React.createElement('rect',{key:0,x:9,y:9,width:13,height:13,rx:2}),React.createElement('path',{key:1,d:'M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'})]),
+  Map:    p=>sv(p,[React.createElement('path',{key:0,d:'M1 6l7-4 8 4 7-4v16l-7 4-8-4-7 4z'}),React.createElement('line',{key:1,x1:8,y1:2,x2:8,y2:18}),React.createElement('line',{key:2,x1:16,y1:6,x2:16,y2:22})]),
+};
+
+// ── TOAST ────────────────────────────────────────────────────
+const ToastCtx=createContext(null);
+function ToastProvider({children}){
+  const[toasts,setToasts]=useState([]);
+  const add=useCallback((msg,type='success',actionLabel=null,onAction=null)=>{
+    const id=genId();
+    setToasts(p=>[...p,{id,msg,type,actionLabel,onAction}]);
+    setTimeout(()=>setToasts(p=>p.filter(t=>t.id!==id)),5000);
+  },[]);
+  const remove=useCallback(id=>setToasts(p=>p.filter(t=>t.id!==id)),[]);
+  return React.createElement(ToastCtx.Provider,{value:add},
+    children,
+    React.createElement('div',{style:{position:'fixed',left:16,right:16,bottom:'calc(80px + env(safe-area-inset-bottom,0px))',zIndex:70,display:'flex',flexDirection:'column',gap:8,pointerEvents:'none'}},
+      toasts.map(t=>React.createElement('div',{key:t.id,className:'fade-in',style:{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',borderRadius:14,boxShadow:'0 4px 24px rgba(0,0,0,0.25)',fontSize:14,fontWeight:500,pointerEvents:'auto',background:t.type==='error'?'#dc2626':'#1e1b17',color:'white',fontFamily:'var(--font-sans)'}},
+        React.createElement(t.type==='error'?IC.X:IC.Check,{s:16}),
+        React.createElement('span',{style:{flex:1}},t.msg),
+        t.actionLabel&&React.createElement('button',{style:{marginLeft:4,fontWeight:700,textDecoration:'underline',textUnderlineOffset:2,color:'#fbbf24',whiteSpace:'nowrap',background:'none',border:'none',cursor:'pointer',fontFamily:'var(--font-sans)',fontSize:13},onClick:()=>{t.onAction?.();remove(t.id);}},t.actionLabel)
+      ))
+    )
+  );
+}
+function useToast(){return useContext(ToastCtx);}
+
+// ── BTN — fully CSS-var driven, no hardcoded palette ────────
+function Btn({children,variant='primary',size='md',className='',onClick,disabled,style}){
+  const base='inline-flex items-center justify-center gap-2 font-medium rounded-xl transition-all duration-150 select-none active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed';
+  const vStyles={
+    primary:{background:'var(--btn-primary-bg)',color:'var(--btn-primary-text)',boxShadow:'0 2px 8px rgba(0,0,0,0.15)'},
+    secondary:{background:'var(--surface2)',color:'var(--text)',border:'1px solid var(--border)'},
+    ghost:{background:'transparent',color:'var(--text)'},
+    danger:{background:'var(--danger)',color:'white'},
+    accent:{background:'var(--accent)',color:'white',boxShadow:'0 2px 10px rgba(193,122,53,0.3)'},
+  };
+  const vHover={primary:'',secondary:'',ghost:'',danger:'',accent:''};
+  const sizes={sm:'px-3 py-1.5 text-sm',md:'px-4 py-2.5 text-sm',lg:'px-6 py-3 text-base',icon:'p-2.5'};
+  return React.createElement('button',{
+    className:`${base} ${sizes[size]||sizes.md} ${className}`,
+    style:{...vStyles[variant]||vStyles.ghost,...style},
+    onClick,disabled,type:'button',
+    onMouseEnter:e=>{if(variant==='ghost'||variant==='secondary')e.currentTarget.style.background='var(--btn-ghost-hover)';},
+    onMouseLeave:e=>{if(variant==='ghost')e.currentTarget.style.background='transparent';else if(variant==='secondary')e.currentTarget.style.background='var(--surface2)';},
+  },children);
+}
+
+// ── MARKDOWN CONTENT — memoized style primitives ─────────────
+const MarkdownContent=memo(function MarkdownContent({content,fontFamily,fontSize,lineHeight}){
+  const[html,setHtml]=useState('');
+  const[ready,setReady]=useState(MARKED_READY);
+  useEffect(()=>{if(!ready){initLibs().then(()=>setReady(true));}},[]);
+  useEffect(()=>{if(ready&&content)setHtml(renderMarkdown(content));},[content,ready]);
+  // Memoized style — primitives so memo() shallow-equal works correctly
+  const style=useMemo(()=>({
+    fontFamily:fontFamily?`var(--font-${fontFamily})`:undefined,
+    fontSize:fontSize?`${fontSize}px`:undefined,
+    lineHeight:lineHeight||undefined,
+  }),[fontFamily,fontSize,lineHeight]);
+  if(!ready)return React.createElement('div',{style:{padding:16,color:'var(--text2)',fontSize:14}},'Loading renderer…');
+  return React.createElement('div',{className:'prose',style,dangerouslySetInnerHTML:{__html:html}});
+});
+
+// ── APPEARANCE PICKER ────────────────────────────────────────
+function AppearancePicker({theme,fontSize,fontFamily,onTheme,onFontSize,onFontFamily}){
+  const themes=[
+    {id:'light',label:'☀️ Light', bg:'#f5f0e5',fg:'#4a3728'},
+    {id:'sepia',label:'☕ Sepia', bg:'#f5efe0',fg:'#4a3728'},
+    {id:'dark', label:'🌙 Dark',  bg:'#1e1b17',fg:'#e0d8cc'},
+  ];
+  const fonts=[
+    {id:'serif',label:'Serif', fm:'var(--font-serif)'},
+    {id:'sans', label:'Sans',  fm:'var(--font-sans)'},
+    {id:'mono', label:'Mono',  fm:'var(--font-mono)'},
+  ];
+  return React.createElement('div',null,
+    React.createElement('p',{className:'sec-label'},'Theme'),
+    React.createElement('div',{style:{display:'flex',gap:8,marginBottom:20}},
+      themes.map(({id,label,bg,fg})=>React.createElement('button',{
+        key:id,className:`appear-chip${theme===id?' selected':''}`,
+        onClick:()=>onTheme(id),
+        style:{background:bg,color:fg,border:`2px solid ${theme===id?'var(--accent)':'transparent'}`}
+      },label))
+    ),
+    React.createElement('p',{className:'sec-label'},'Font Size'),
+    React.createElement('div',{className:'range-row'},
+      React.createElement('button',{className:'range-btn',onClick:()=>onFontSize(Math.max(13,fontSize-1))},'A−'),
+      React.createElement('span',{className:'range-val'},`${fontSize}px`),
+      React.createElement('button',{className:'range-btn',onClick:()=>onFontSize(Math.min(32,fontSize+1))},'A+')
+    ),
+    React.createElement('p',{className:'sec-label'},'Typeface'),
+    React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:4}},
+      fonts.map(({id,label,fm})=>React.createElement('button',{
+        key:id,className:`appear-chip${fontFamily===id?' selected':''}`,
+        onClick:()=>onFontFamily(id),
+        style:{fontFamily:fm,background:fontFamily===id?'var(--accent-light)':'var(--surface2)',color:fontFamily===id?'var(--accent-text)':'var(--text2)',border:`2px solid ${fontFamily===id?'var(--accent)':'var(--border)'}`}
+      },label))
+    )
+  );
+}
+
+// ── COPY HELPER ──────────────────────────────────────────────
+async function copyNote(note){
+  const text=note.title+(note.content?'\n\n'+note.content:'');
+  try{await navigator.clipboard.writeText(text);return true;}
+  catch{try{const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0;top:0;left:0;';document.body.appendChild(ta);ta.focus();ta.select();document.execCommand('copy');document.body.removeChild(ta);return true;}catch{return false;}}
+}
+
+// ── HEADER ───────────────────────────────────────────────────
+function Header({title,left,right,subtitle}){
+  return React.createElement('div',{style:{background:'var(--surface)',borderBottom:'1px solid var(--border)',flexShrink:0}},
+    React.createElement('div',{className:'safe-top',style:{display:'flex',alignItems:'center',gap:8,padding:'0 16px',minHeight:56,paddingBottom:8}},
+      left&&React.createElement('div',{style:{display:'flex',alignItems:'center'}},left),
+      React.createElement('div',{style:{flex:1,minWidth:0,padding:'0 8px'}},
+        React.createElement('h1',{style:{fontWeight:600,fontSize:16,color:'var(--text)',fontFamily:'var(--font-sans)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},title),
+        subtitle&&React.createElement('p',{style:{fontSize:12,color:'var(--text2)',marginTop:1,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},subtitle)
+      ),
+      right&&React.createElement('div',{style:{display:'flex',alignItems:'center',gap:4}},right)
+    )
+  );
+}
+
+// ── BOTTOM NAV ───────────────────────────────────────────────
+function BottomNav({activeView,onNavigate}){
+  return React.createElement('div',{className:'bottom-nav flex-shrink-0 flex items-center z-40'},
+    React.createElement('button',{className:`nav-btn${activeView==='dashboard'?' active':''}`,onClick:()=>onNavigate({view:'dashboard',params:{}})},React.createElement(IC.Book,{s:22}),React.createElement('span',null,'Library')),
+    React.createElement('div',{style:{flex:1,display:'flex',alignItems:'center',justifyContent:'center'}},
+      React.createElement('button',{className:'nav-btn-new',onClick:()=>onNavigate({view:'editor',params:{}})},
+        React.createElement('div',{style:{width:42,height:42,borderRadius:13,background:'var(--accent)',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 3px 12px rgba(193,122,53,0.4)'}},
+          React.createElement(IC.Plus,{s:22,style:{color:'white'}})
+        )
+      )
+    ),
+    React.createElement('button',{className:`nav-btn${activeView==='search'?' active':''}`,onClick:()=>onNavigate({view:'search',params:{}})},React.createElement(IC.Search,{s:22}),React.createElement('span',null,'Search')),
+    React.createElement('button',{className:`nav-btn${activeView==='settings'?' active':''}`,onClick:()=>onNavigate({view:'settings',params:{}})},React.createElement(IC.Settings,{s:22}),React.createElement('span',null,'Settings'))
+  );
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────
+function DashboardView(){
+  const{state,dispatch}=useApp();
+  const toast=useToast();
+  const[creating,setCreating]=useState(false);
+  const[newName,setNewName]=useState('');
+  const[confirmDel,setConfirmDel]=useState(null);
+  const[searchQ,setSearchQ]=useState('');
+  const[editingCol,setEditingCol]=useState(null);
+  const[editColName,setEditColName]=useState('');
+  const scrollRef=useRef();
+  const fileRef=useRef();
+  const SK='dashboard';
+
+  // Restore scroll position
+  useEffect(()=>{const p=_scrollPos.get(SK);if(p&&scrollRef.current)scrollRef.current.scrollTop=p;},[]);
+
+  const noteCounts=useMemo(()=>state.notes.reduce((a,n)=>{a[n.collectionId]=(a[n.collectionId]||0)+1;return a;},{}),[ state.notes]);
+  const recentNotes=useMemo(()=>[...state.notes].filter(n=>n.lastOpenedAt).sort((a,b)=>(b.lastOpenedAt||0)-(a.lastOpenedAt||0)).slice(0,3),[state.notes]);
+  const totalWords=useMemo(()=>state.notes.reduce((a,n)=>a+getWordCount(n.content),0),[state.notes]);
+  const filtered=useMemo(()=>!searchQ?state.collections:state.collections.filter(c=>c.name.toLowerCase().includes(searchQ.toLowerCase())),[state.collections,searchQ]);
+
+  function doCreate(){if(!newName.trim())return;dispatch({type:'CREATE_COLLECTION',name:newName.trim()});toast('Collection created');setNewName('');setCreating(false);}
+  function doDelete(id){
+    if(confirmDel===id){const cnt=noteCounts[id]||0;dispatch({type:'DELETE_COLLECTION',id});toast(`Collection and ${cnt} note${cnt!==1?'s':''} deleted`);setConfirmDel(null);}
+    else{setConfirmDel(id);setTimeout(()=>setConfirmDel(c=>c===id?null:c),4500);}
+  }
+  function saveCol(id,e){e?.stopPropagation();if(!editColName.trim()){setEditingCol(null);return;}dispatch({type:'UPDATE_COLLECTION',id,patch:{name:editColName.trim()}});toast('Renamed');setEditingCol(null);}
+  function doExport(){const b={version:3,timestamp:Date.now(),collections:state.collections,folders:state.folders,notes:state.notes};const url=URL.createObjectURL(new Blob([JSON.stringify(b,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`lexicon_${new Date().toISOString().split('T')[0]}.json`;a.click();URL.revokeObjectURL(url);toast('Exported');}
+  function doImport(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!d.notes&&!d.collections)throw 0;dispatch({type:'IMPORT',data:d});toast(`Imported ${d.notes?.length||0} notes`);}catch{toast('Invalid file','error');}};r.readAsText(f);e.target.value='';}
+
+  return React.createElement('div',{style:{display:'flex',flexDirection:'column',height:'100%',background:'var(--bg)',overflow:'hidden'}},
+    // Header
+    React.createElement('div',{className:'safe-top',style:{background:'var(--surface)',borderBottom:'1px solid var(--border)',flexShrink:0,padding:'0 16px 12px'}},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:8,marginBottom:12}},
+        React.createElement('div',null,
+          React.createElement('h1',{style:{fontSize:26,fontWeight:700,color:'var(--text)',fontFamily:'var(--font-serif)'}},`Library`),
+          React.createElement('p',{style:{fontSize:12,color:'var(--text2)',marginTop:2}},`${state.notes.length} notes · ${state.collections.length} collections · ${totalWords.toLocaleString()} words`)
+        ),
+        React.createElement('div',{style:{display:'flex',gap:6}},
+          React.createElement(Btn,{variant:'ghost',size:'icon',onClick:doExport,title:'Export'},React.createElement(IC.Download,{s:18})),
+          React.createElement(Btn,{variant:'ghost',size:'icon',onClick:()=>fileRef.current?.click(),title:'Import'},React.createElement(IC.Upload,{s:18})),
+          React.createElement('input',{ref:fileRef,type:'file',accept:'.json',style:{display:'none'},onChange:doImport})
+        )
+      ),
+      React.createElement('div',{style:{position:'relative'}},
+        React.createElement('div',{style:{position:'absolute',left:10,top:'50%',transform:'translateY(-50%)',color:'var(--text3)',pointerEvents:'none'}},React.createElement(IC.Search,{s:16})),
+        React.createElement('input',{className:'inp',style:{paddingLeft:34,paddingRight:14,paddingTop:10,paddingBottom:10,fontSize:14},placeholder:'Search collections…',value:searchQ,onChange:e=>setSearchQ(e.target.value)})
+      )
+    ),
+
+    // Body
+    React.createElement('div',{ref:scrollRef,style:{flex:1,overflowY:'auto',padding:'16px 16px'},onScroll:e=>_scrollPos.set(SK,e.currentTarget.scrollTop)},
+      // Recent notes
+      recentNotes.length>0&&!searchQ&&React.createElement('div',{style:{marginBottom:20}},
+        React.createElement('p',{className:'sec-label'},'Recent'),
+        React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:6}},
+          recentNotes.map(note=>{
+            const col=state.collections.find(c=>c.id===note.collectionId);
+            return React.createElement('button',{key:note.id,style:{display:'flex',alignItems:'center',gap:12,padding:'10px 12px',borderRadius:14,background:'var(--surface)',border:'1px solid var(--border)',textAlign:'left',cursor:'pointer',width:'100%'},onClick:()=>{dispatch({type:'OPEN_NOTE',id:note.id});dispatch({type:'NAVIGATE',payload:{view:'reader',params:{noteId:note.id}}});}},
+              React.createElement(IC.File,{s:16,style:{color:'var(--text2)',flexShrink:0}}),
+              React.createElement('div',{style:{flex:1,minWidth:0}},
+                React.createElement('p',{style:{fontSize:14,fontWeight:500,color:'var(--text)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},note.title),
+                React.createElement('p',{style:{fontSize:12,color:'var(--text2)',marginTop:1}},`${col?.name||'Unknown'} · ${fmtDate(note.modifiedAt||note.createdAt)}`)
+              )
+            );
+          })
+        )
+      ),
+
+      // Collections
+      React.createElement('p',{className:'sec-label'},'Collections'),
+      React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:16}},
+        filtered.map((col,idx)=>{
+          const c=colColors(col.colorIdx,idx,state.theme);
+          const cnt=noteCounts[col.id]||0;
+          const isEdit=editingCol===col.id;
+          const isConf=confirmDel===col.id;
+          return React.createElement('div',{key:col.id,
+            style:{position:'relative',padding:16,borderRadius:20,border:`1.5px solid ${isConf?'var(--danger)':isEdit?'var(--accent)':c.bd}`,background:c.bg,cursor:isEdit?'default':'pointer',transition:'transform 0.1s,box-shadow 0.1s'},
+            onClick:isEdit?undefined:()=>dispatch({type:'NAVIGATE',payload:{view:'collection',params:{collectionId:col.id}}})
+          },
+            React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}},
+              React.createElement('div',{style:{padding:8,borderRadius:10,background:'rgba(128,128,128,0.15)'}},
+                React.createElement(IC.Folder,{s:20,style:{color:c.tx}})
+              ),
+              isEdit
+                ?React.createElement('div',{style:{display:'flex',gap:4}},
+                    React.createElement('button',{style:{padding:'4px 6px',borderRadius:8,background:'var(--success)',border:'none',color:'white',cursor:'pointer'},onClick:e=>saveCol(col.id,e)},React.createElement(IC.Check,{s:14})),
+                    React.createElement('button',{style:{padding:'4px 6px',borderRadius:8,background:'var(--surface)',border:'1px solid var(--border)',color:'var(--text2)',cursor:'pointer'},onClick:e=>{e.stopPropagation();setEditingCol(null);}},React.createElement(IC.X,{s:14}))
+                  )
+                :React.createElement('div',{style:{display:'flex',gap:2}},
+                    React.createElement('button',{style:{padding:6,borderRadius:8,color:'var(--text2)',background:'none',border:'none',cursor:'pointer'},onClick:e=>{e.stopPropagation();setEditingCol(col.id);setEditColName(col.name);setConfirmDel(null);}},React.createElement(IC.Edit,{s:13})),
+                    React.createElement('button',{style:{padding:6,borderRadius:8,background:isConf?'var(--danger)':'none',border:'none',color:isConf?'white':'var(--text2)',cursor:'pointer',transition:'all 0.15s'},onClick:e=>{e.stopPropagation();doDelete(col.id);}},React.createElement(IC.Trash,{s:13}))
+                  )
+            ),
+            isEdit
+              ?React.createElement('input',{autoFocus:true,value:editColName,onChange:e=>setEditColName(e.target.value),onKeyDown:e=>{if(e.key==='Enter')saveCol(col.id,e);if(e.key==='Escape'){e.stopPropagation();setEditingCol(null);}e.stopPropagation();},onClick:e=>e.stopPropagation(),style:{width:'100%',fontSize:14,fontWeight:600,background:'transparent',outline:'none',borderBottom:'1.5px solid var(--accent)',paddingBottom:2,color:c.tx,fontFamily:'var(--font-sans)'}})
+              :React.createElement('p',{style:{fontWeight:600,fontSize:14,color:c.tx,wordBreak:'break-word',marginTop:4}},col.name),
+            isConf
+              ?React.createElement('p',{style:{fontSize:11,marginTop:3,color:'var(--danger)',fontWeight:600}},`Delete + ${cnt} note${cnt!==1?'s':''}?`)
+              :React.createElement('p',{style:{fontSize:12,marginTop:3,color:c.tx,opacity:0.65}},`${cnt} ${cnt===1?'note':'notes'}`)
+          );
+        }),
+
+        // Add card
+        creating
+          ?React.createElement('div',{style:{padding:16,borderRadius:20,border:'1.5px dashed var(--border)',background:'var(--surface)',display:'flex',flexDirection:'column',gap:10}},
+              React.createElement('input',{autoFocus:true,placeholder:'Collection name…',value:newName,onChange:e=>setNewName(e.target.value),onKeyDown:e=>{if(e.key==='Enter')doCreate();if(e.key==='Escape'){setCreating(false);setNewName('');}},style:{background:'transparent',border:'none',borderBottom:'1.5px solid var(--accent)',outline:'none',fontSize:14,fontWeight:500,color:'var(--text)',paddingBottom:4,fontFamily:'var(--font-sans)'}}),
+              React.createElement('div',{style:{display:'flex',gap:8}},
+                React.createElement(Btn,{variant:'primary',size:'sm',onClick:doCreate},'Create'),
+                React.createElement(Btn,{variant:'ghost',size:'sm',onClick:()=>{setCreating(false);setNewName('');}},`Cancel`)
+              )
+            )
+          :React.createElement('button',{style:{padding:16,borderRadius:20,border:'2px dashed var(--border)',background:'transparent',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:8,cursor:'pointer',minHeight:100,color:'var(--text2)'},onClick:()=>setCreating(true)},
+              React.createElement(IC.Plus,{s:24}),
+              React.createElement('span',{style:{fontSize:12,fontWeight:500}},'New Collection')
+            )
+      )
+    )
+  );
+}
+
+// ── COLLECTION VIEW ──────────────────────────────────────────
+function CollectionView(){
+  const{state,dispatch}=useApp();
+  const toast=useToast();
+  const params=state.navStack[state.navStack.length-1]?.params||{};
+  const{collectionId,folderId:activeFolderId}=params;
+  const[searchQ,setSearchQ]=useState('');
+  const[sortBy,setSortBy]=useState(state.sortBy||'modified');
+  const[showSort,setShowSort]=useState(false);
+  const[confirmDel,setConfirmDel]=useState(null);
+  const[creatingFolder,setCreatingFolder]=useState(false);
+  const[newFolderName,setNewFolderName]=useState('');
+  const[editFolder,setEditFolder]=useState(null);
+  const[editFolderName,setEditFolderName]=useState('');
+  const[copiedId,setCopiedId]=useState(null);
+  const scrollRef=useRef();
+  const sortRef=useRef();
+  const SK=`collection_${collectionId}_${activeFolderId||''}`;
+  useOutsideClick(sortRef,()=>setShowSort(false));
+
+  // Restore scroll
+  useEffect(()=>{const p=_scrollPos.get(SK);if(p&&scrollRef.current)scrollRef.current.scrollTop=p;},[]);
+  useEffect(()=>{setSortBy(state.sortBy||'modified');},[state.sortBy]);
+
+  const collection=state.collections.find(c=>c.id===collectionId);
+  const activeFolder=activeFolderId?state.folders.find(f=>f.id===activeFolderId):null;
+
+  // Memoize folder note counts — avoids O(N×F) loop inside map
+  const folderCounts=useMemo(()=>state.notes.filter(n=>n.collectionId===collectionId).reduce((a,n)=>{if(n.folderId){a[n.folderId]=(a[n.folderId]||0)+1;}return a;},{}),[ state.notes,collectionId]);
+
+  const colFolders=useMemo(()=>{
+    const fs=state.folders.filter(f=>f.collectionId===collectionId);
+    return[...fs].sort((a,b)=>sortBy==='created'?b.createdAt-a.createdAt:a.name.localeCompare(b.name));
+  },[state.folders,collectionId,sortBy]);
+
+  const visNotes=useMemo(()=>{
+    let r=state.notes.filter(n=>n.collectionId===collectionId);
+    r=activeFolderId?r.filter(n=>n.folderId===activeFolderId):r.filter(n=>!n.folderId);
+    if(searchQ)r=r.filter(n=>n.title.toLowerCase().includes(searchQ.toLowerCase())||n.content.toLowerCase().includes(searchQ.toLowerCase()));
+    return[...r].sort((a,b)=>{
+      if(sortBy==='name')return a.title.localeCompare(b.title);
+      if(sortBy==='created')return b.createdAt-a.createdAt;
+      if(sortBy==='words')return getWordCount(b.content)-getWordCount(a.content);
+      return(b.modifiedAt||b.createdAt)-(a.modifiedAt||a.createdAt);
+    });
+  },[state.notes,collectionId,activeFolderId,searchQ,sortBy]);
+
+  const visFolders=activeFolderId?[]:colFolders;
+  if(!collection)return React.createElement('div',{style:{padding:32,textAlign:'center',color:'var(--text2)'}},'Collection not found');
+
+  function delNote(id,e){e?.stopPropagation();if(confirmDel===id){const note=state.notes.find(n=>n.id===id);dispatch({type:'DELETE_NOTE',id});setConfirmDel(null);toast('Note deleted','success','Undo',()=>dispatch({type:'RESTORE_NOTE',note}));}else{setConfirmDel(id);setTimeout(()=>setConfirmDel(c=>c===id?null:c),4500);}}
+  function delFolder(id,e){e?.stopPropagation();if(confirmDel===id){dispatch({type:'DELETE_FOLDER',id});toast('Folder deleted');setConfirmDel(null);}else{setConfirmDel(id);setTimeout(()=>setConfirmDel(c=>c===id?null:c),4500);}}
+  function mkFolder(){if(!newFolderName.trim())return;dispatch({type:'CREATE_FOLDER',name:newFolderName.trim(),collectionId});toast('Folder created');setNewFolderName('');setCreatingFolder(false);}
+  function saveFolder(id){if(!editFolderName.trim())return;dispatch({type:'UPDATE_FOLDER',id,patch:{name:editFolderName.trim()}});toast('Renamed');setEditFolder(null);}
+  async function doCopy(note,e){e.stopPropagation();const ok=await copyNote(note);if(ok){setCopiedId(note.id);setTimeout(()=>setCopiedId(x=>x===note.id?null:x),1500);}else toast('Copy failed','error');}
+
+  return React.createElement('div',{style:{display:'flex',flexDirection:'column',height:'100%',background:'var(--bg)'}},
+    React.createElement(Header,{
+      title:activeFolder?`${collection.name} / ${activeFolder.name}`:collection.name,
+      subtitle:`${visNotes.length} note${visNotes.length!==1?'s':''}${!activeFolderId&&visFolders.length>0?` · ${visFolders.length} folder${visFolders.length!==1?'s':''}` : ''}`,
+      left:React.createElement(Btn,{variant:'ghost',size:'icon',onClick:()=>dispatch({type:'BACK'})},React.createElement(IC.Back,{s:20})),
+      right:React.createElement(React.Fragment,null,
+        !activeFolderId&&React.createElement(Btn,{variant:'ghost',size:'icon',onClick:()=>setCreatingFolder(true)},React.createElement(IC.FolderPlus,{s:18})),
+        React.createElement(Btn,{variant:'accent',size:'sm',onClick:()=>dispatch({type:'NAVIGATE',payload:{view:'editor',params:{collectionId,folderId:activeFolderId||undefined}}})},React.createElement(IC.Plus,{s:16}),'Note')
+      )
+    }),
+
+    // Search + Sort bar
+    React.createElement('div',{style:{padding:'10px 16px',background:'var(--surface)',borderBottom:'1px solid var(--border)',display:'flex',gap:8,flexShrink:0}},
+      React.createElement('div',{style:{position:'relative',flex:1}},
+        React.createElement('div',{style:{position:'absolute',left:10,top:'50%',transform:'translateY(-50%)',color:'var(--text3)',pointerEvents:'none'}},React.createElement(IC.Search,{s:14})),
+        React.createElement('input',{className:'inp',style:{paddingLeft:32,paddingRight:12,paddingTop:8,paddingBottom:8,fontSize:13},placeholder:'Search notes…',value:searchQ,onChange:e=>setSearchQ(e.target.value)})
+      ),
+      React.createElement('div',{style:{position:'relative'},ref:sortRef},
+        React.createElement(Btn,{variant:'ghost',size:'icon',onClick:()=>setShowSort(s=>!s)},React.createElement(IC.Sort,{s:16})),
+        showSort&&React.createElement('div',{className:'fade-in',style:{position:'absolute',right:0,top:'calc(100% + 4px)',width:176,background:'var(--surface)',border:'1px solid var(--border)',borderRadius:14,boxShadow:'0 8px 24px rgba(0,0,0,0.15)',zIndex:30,padding:'4px 0'}},
+          SORT_OPTIONS.map(opt=>React.createElement('button',{key:opt.id,style:{width:'100%',textAlign:'left',padding:'10px 16px',fontSize:13,background:'none',border:'none',cursor:'pointer',color:sortBy===opt.id?'var(--accent)':'var(--text)',fontWeight:sortBy===opt.id?600:400,display:'flex',alignItems:'center',gap:8,fontFamily:'var(--font-sans)'},onClick:()=>{setSortBy(opt.id);dispatch({type:'SET',payload:{sortBy:opt.id}});setShowSort(false);}},
+            sortBy===opt.id?React.createElement(IC.Check,{s:14,style:{color:'var(--accent)'}}):React.createElement('span',{style:{width:14}}),
+            opt.label
+          ))
+        )
+      )
+    ),
+
+    // Content
+    React.createElement('div',{ref:scrollRef,style:{flex:1,overflowY:'auto',padding:16},onScroll:e=>_scrollPos.set(SK,e.currentTarget.scrollTop)},
+
+      // Create folder inline
+      creatingFolder&&React.createElement('div',{className:'fade-in',style:{marginBottom:12,padding:'10px 14px',borderRadius:14,background:'var(--surface)',border:'1px solid var(--border)',display:'flex',gap:10,alignItems:'center'}},
+        React.createElement(IC.FolderPlus,{s:16,style:{color:'var(--text2)',flexShrink:0}}),
+        React.createElement('input',{autoFocus:true,placeholder:'Folder name…',value:newFolderName,onChange:e=>setNewFolderName(e.target.value),onKeyDown:e=>{if(e.key==='Enter')mkFolder();if(e.key==='Escape'){setCreatingFolder(false);setNewFolderName('');}},style:{flex:1,background:'transparent',border:'none',outline:'none',fontSize:13,color:'var(--text)',fontFamily:'var(--font-sans)'}}),
+        React.createElement(Btn,{variant:'ghost',size:'icon',onClick:()=>{setCreatingFolder(false);setNewFolderName('');}},React.createElement(IC.X,{s:14})),
+        React.createElement(Btn,{variant:'primary',size:'sm',onClick:mkFolder},'Create')
+      ),
+
+      // Folders
+      visFolders.length>0&&React.createElement('div',{style:{marginBottom:12}},
+        React.createElement('p',{className:'sec-label'},'Folders'),
+        React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:8}},
+          visFolders.map(folder=>{
+            const fc=folderCounts[folder.id]||0;
+            return React.createElement('div',{key:folder.id,style:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:16,display:'flex',alignItems:'center',gap:12,minHeight:56,cursor:'pointer',transition:'box-shadow 0.15s'},onClick:()=>{if(editFolder===folder.id)return;dispatch({type:'NAVIGATE',payload:{view:'collection',params:{collectionId,folderId:folder.id}}});}},
+              React.createElement('div',{style:{padding:12,flexShrink:0}},
+                React.createElement('div',{style:{padding:8,borderRadius:10,background:'var(--accent-light)'}},React.createElement(IC.Folder,{s:20,style:{color:'var(--accent)'}}))
+              ),
+              editFolder===folder.id
+                ?React.createElement('input',{autoFocus:true,value:editFolderName,onChange:e=>setEditFolderName(e.target.value),onKeyDown:e=>{if(e.key==='Enter')saveFolder(folder.id);if(e.key==='Escape')setEditFolder(null);},onClick:e=>e.stopPropagation(),style:{flex:1,padding:'12px 0',fontSize:13,background:'transparent',outline:'none',borderBottom:'1.5px solid var(--accent)',color:'var(--text)',minWidth:0,paddingRight:8,fontFamily:'var(--font-sans)'}})
+                :React.createElement('div',{style:{flex:1,minWidth:0,padding:'12px 0'}},
+                    React.createElement('p',{style:{fontSize:14,fontWeight:600,color:'var(--text)',wordBreak:'break-word'}},folder.name),
+                    React.createElement('p',{style:{fontSize:12,color:'var(--text2)',marginTop:2}},`${fc} ${fc===1?'note':'notes'}`)
+                  ),
+              React.createElement('div',{style:{display:'flex',gap:4,paddingRight:8,flexShrink:0}},
+                editFolder===folder.id
+                  ?React.createElement(React.Fragment,null,
+                      React.createElement('button',{style:{padding:8,borderRadius:10,color:'var(--success)',background:'none',border:'none',cursor:'pointer'},onClick:e=>{e.stopPropagation();saveFolder(folder.id);}},React.createElement(IC.Check,{s:16})),
+                      React.createElement('button',{style:{padding:8,borderRadius:10,color:'var(--danger)',background:'none',border:'none',cursor:'pointer'},onClick:e=>{e.stopPropagation();setEditFolder(null);}},React.createElement(IC.X,{s:16}))
+                    )
+                  :React.createElement(React.Fragment,null,
+                      React.createElement('button',{style:{padding:8,borderRadius:10,color:'var(--text2)',background:'none',border:'none',cursor:'pointer'},onClick:e=>{e.stopPropagation();setEditFolder(folder.id);setEditFolderName(folder.name);}},React.createElement(IC.Edit,{s:15})),
+                      React.createElement('button',{style:{padding:8,borderRadius:10,background:confirmDel===folder.id?'var(--danger)':'none',color:confirmDel===folder.id?'white':'var(--text2)',border:'none',cursor:'pointer',transition:'all 0.15s'},onClick:e=>delFolder(folder.id,e)},React.createElement(IC.Trash,{s:15}))
+                    )
+              )
+            );
+          })
+        )
+      ),
+
+      // Notes
+      React.createElement('div',null,
+        visFolders.length>0&&React.createElement('p',{className:'sec-label',style:{marginTop:4}},'Notes'),
+        visNotes.length===0&&React.createElement('div',{style:{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'64px 0',textAlign:'center'}},
+          React.createElement(IC.File,{s:40,style:{color:'var(--text3)',marginBottom:12}}),
+          React.createElement('p',{style:{color:'var(--text2)',fontWeight:500}},'No notes here yet'),
+          React.createElement(Btn,{variant:'primary',size:'sm',style:{marginTop:12},onClick:()=>dispatch({type:'NAVIGATE',payload:{view:'editor',params:{collectionId,folderId:activeFolderId||undefined}}})},React.createElement(IC.Plus,{s:14}),'Create Note')
+        ),
+        React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:8}},
+          visNotes.map(note=>{
+            const{words,mins}=getReadTime(note.content);
+            const isCopied=copiedId===note.id;
+            const isDel=confirmDel===note.id;
+            return React.createElement('div',{key:note.id,style:{background:'var(--surface)',border:`1.5px solid ${isDel?'var(--danger)':'var(--border)'}`,borderRadius:20,padding:16,cursor:'pointer',transition:'all 0.15s'},onClick:()=>{dispatch({type:'OPEN_NOTE',id:note.id});dispatch({type:'NAVIGATE',payload:{view:'reader',params:{noteId:note.id}}}); }},
+              React.createElement('div',{style:{display:'flex',alignItems:'flex-start',gap:8}},
+                React.createElement('div',{style:{flex:1,minWidth:0}},
+                  React.createElement('h3',{style:{fontWeight:600,color:'var(--text)',fontSize:15,fontFamily:'var(--font-serif)',lineHeight:1.35,marginBottom:4,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}},note.title),
+                  React.createElement('p',{style:{fontSize:13,color:'var(--text2)',lineHeight:1.5,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}},note.content.substring(0,140).replace(/[#*`_\[\]>~]/g,'').replace(/\n/g,' '))
+                ),
+                React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:4,flexShrink:0}},
+                  React.createElement('button',{style:{padding:8,borderRadius:10,border:'none',cursor:'pointer',background:isCopied?'var(--success-light)':'transparent',color:isCopied?'var(--success)':'var(--text3)',transition:'all 0.15s'},onClick:e=>doCopy(note,e),title:'Copy note'},React.createElement(isCopied?IC.Check:IC.Copy,{s:15})),
+                  React.createElement('button',{style:{padding:8,borderRadius:10,border:'none',cursor:'pointer',background:isDel?'var(--danger)':'transparent',color:isDel?'white':'var(--text3)',transition:'all 0.15s'},onClick:e=>delNote(note.id,e),title:'Delete note'},React.createElement(IC.Trash,{s:15}))
+                )
+              ),
+              React.createElement('div',{style:{display:'flex',alignItems:'center',gap:12,marginTop:10}},
+                React.createElement('div',{style:{display:'flex',alignItems:'center',gap:4,fontSize:12,color:'var(--text2)'}},React.createElement(IC.Clock,{s:12}),React.createElement('span',{style:{marginLeft:2}},fmtDate(note.modifiedAt||note.createdAt))),
+                React.createElement('div',{style:{display:'flex',alignItems:'center',gap:4,fontSize:12,color:'var(--text2)'}},React.createElement(IC.Words,{s:12}),React.createElement('span',{style:{marginLeft:2}},mins>0?`${mins} min`:words===0?'Empty':`${words} words`)),
+                isDel&&React.createElement('span',{style:{fontSize:11,color:'var(--danger)',fontWeight:600,marginLeft:'auto',animation:'blink 1s infinite'}},`Tap again to delete`)
+              )
+            );
+          })
+        )
+      )
+    )
+  );
+}
+
+// ── EDITOR ───────────────────────────────────────────────────
+function EditorView(){
+  const{state,dispatch}=useApp();
+  const toast=useToast();
+  const params=state.navStack[state.navStack.length-1]?.params||{};
+  const{noteId,collectionId:preColId,folderId:preFolderId}=params;
+  const existingNote=noteId?state.notes.find(n=>n.id===noteId):null;
+
+  const[title,setTitle]=useState(existingNote?.title||'');
+  const[content,setContent]=useState(existingNote?.content||'');
+  const[selCol,setSelCol]=useState(existingNote?.collectionId||preColId||state.collections[0]?.id||'');
+  const[selFolder,setSelFolder]=useState(existingNote?.folderId||preFolderId||'');
+  const[previewMode,setPreviewMode]=useState(false);
+  const[saveState,setSaveState]=useState('saved');
+  const[showMeta,setShowMeta]=useState(!existingNote);
+  const[dirty,setDirty]=useState(false);
+  const[showDiscard,setShowDiscard]=useState(false);
+  const taRef=useRef();
+  const lastSaved=useRef({title,content});
+
+  const folders=state.folders.filter(f=>f.collectionId===selCol);
+  // Debounced word count — avoid recomputing on every keystroke
+  const dContent=useDebounce(content,400);
+  const dTitle=useDebounce(title,1500);
+  const dContentSave=useDebounce(content,1500);
+  const{words,mins}=useMemo(()=>getReadTime(dContent),[dContent]);
+  // Debounced content for preview — avoids markdown parse on every keystroke
+  const previewContent=useDebounce(content,300);
+
+  // Auto-save for existing notes
+  useEffect(()=>{
+    if(!existingNote)return;
+    if(dTitle===lastSaved.current.title&&dContentSave===lastSaved.current.content)return;
+    setSaveState('saving');
+    dispatch({type:'UPDATE_NOTE',id:existingNote.id,title:dTitle,content:dContentSave});
+    lastSaved.current={title:dTitle,content:dContentSave};
+    setTimeout(()=>setSaveState('saved'),500);
+    setDirty(false);
+  },[dTitle,dContentSave]);
+
+  function markDirty(){setDirty(true);setSaveState('unsaved');}
+  function doSave(){
+    if(!title.trim()){toast('Please add a title','error');return;}
+    if(!selCol){toast('Please select a collection','error');return;}
+    if(existingNote){dispatch({type:'UPDATE_NOTE',id:existingNote.id,title:title.trim(),content});toast('Saved');}
+    else{dispatch({type:'CREATE_NOTE',title:title.trim(),content,collectionId:selCol,folderId:selFolder||undefined});toast('Note created');}
+    dispatch({type:'BACK'});
+  }
+  function doBack(){
+    const newDirty=!existingNote&&(title.trim()||content.trim());
+    if(newDirty||dirty){setShowDiscard(true);}else{dispatch({type:'BACK'});}
+  }
+
+  function ins(before,after=''){
+    const ta=taRef.current;if(!ta)return;
+    const s=ta.selectionStart,e=ta.selectionEnd,sel=content.slice(s,e);
+    const nc=content.slice(0,s)+before+sel+after+content.slice(e);
+    setContent(nc);markDirty();
+    setTimeout(()=>{ta.focus();ta.setSelectionRange(s+before.length,s+before.length+sel.length);},10);
+  }
+  function insLine(prefix){
+    const ta=taRef.current;if(!ta)return;
+    const s=ta.selectionStart;
+    const ls=content.lastIndexOf('\n',s-1)+1;
+    const le=content.indexOf('\n',s);
+    const line=content.slice(ls,le===-1?undefined:le);
+    const stripped=line.replace(/^#{1,6}\s+/,'');
+    const nc=content.slice(0,ls)+prefix+stripped+(le===-1?'':content.slice(le));
+    setContent(nc);markDirty();
+    setTimeout(()=>{ta.focus();ta.setSelectionRange(ls+prefix.length,ls+prefix.length+stripped.length);},10);
+  }
+  function insList(prefix){
+    const ta=taRef.current;if(!ta)return;
+    const s=ta.selectionStart;
+    const ls=content.lastIndexOf('\n',s-1)+1;
+    const nc=content.slice(0,ls)+prefix+content.slice(ls);
+    setContent(nc);markDirty();
+    setTimeout(()=>{ta.focus();ta.setSelectionRange(ls+prefix.length,ls+prefix.length);},10);
+  }
+
+  const toolbar=[
+    {label:'B',w:700,fn:()=>ins('**','**')},{label:'I',style:'italic',fn:()=>ins('_','_')},
+    {label:'H1',mono:true,fn:()=>insLine('# ')},{label:'H2',mono:true,fn:()=>insLine('## ')},{label:'H3',mono:true,fn:()=>insLine('### ')},
+    {label:'`c`',mono:true,fn:()=>ins('`','`')},{label:'```',mono:true,fn:()=>ins('```\n','\n```')},
+    {label:'❝',fn:()=>insList('> ')},{label:'—',fn:()=>{setContent(c=>c+'\n\n---\n\n');markDirty();}},
+    {label:'•',fn:()=>insList('- ')},{label:'1.',mono:true,fn:()=>insList('1. ')},{label:'☐',fn:()=>insList('- [ ] ')},
+    {label:'[]',fn:()=>ins('[','](url)')},{label:'~~',mono:true,fn:()=>ins('~~','~~')},
+  ];
+  const saveLabel=saveState==='saving'?'⟳ Saving…':saveState==='unsaved'?'● Unsaved':existingNote?'✓ Saved':'New Note';
+
+  return React.createElement('div',{style:{display:'flex',flexDirection:'column',height:'100%',background:'var(--surface)'}},
+    // Header
+    React.createElement('div',{className:'safe-top',style:{borderBottom:'1px solid var(--border)',flexShrink:0,background:'var(--surface)',padding:'0 16px 8px'}},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:8,marginTop:8}},
+        React.createElement(Btn,{variant:'ghost',size:'icon',onClick:doBack},React.createElement(IC.Back,{s:20})),
+        React.createElement('div',{style:{flex:1,textAlign:'center'}},React.createElement('p',{style:{fontSize:12,color:'var(--text2)'}},saveLabel)),
+        React.createElement(Btn,{variant:'ghost',size:'icon',onClick:()=>setPreviewMode(p=>!p),title:'Preview'},React.createElement(IC.Eye,{s:18,style:{color:previewMode?'var(--accent)':'var(--text2)'}}) ),
+        React.createElement(Btn,{variant:'ghost',size:'icon',onClick:()=>setShowMeta(p=>!p),title:'Collection'},React.createElement(IC.Map,{s:18,style:{color:showMeta?'var(--accent)':'var(--text2)'}})),
+        React.createElement(Btn,{variant:'accent',size:'sm',onClick:doSave},React.createElement(IC.Save,{s:15}),existingNote?'Save':'Create')
+      )
+    ),
+
+    // Title
+    React.createElement('div',{style:{padding:'12px 16px 10px',borderBottom:'1px solid var(--border)',flexShrink:0,background:'var(--surface)'}},
+      React.createElement('input',{placeholder:'Note title…',value:title,onChange:e=>{setTitle(e.target.value);markDirty();},style:{width:'100%',fontSize:20,fontWeight:700,background:'transparent',outline:'none',color:'var(--text)',fontFamily:'var(--font-serif)',border:'none'},autoCorrect:'on',autoCapitalize:'sentences'})
+    ),
+
+    // Meta panel
+    showMeta&&React.createElement('div',{className:'fade-in',style:{borderBottom:'1px solid var(--border)',padding:'12px 16px',flexShrink:0,background:'var(--bg)'}},
+      React.createElement('p',{className:'sec-label'},'Save to collection'),
+      React.createElement('div',{style:{display:'flex',flexWrap:'wrap',gap:8,marginBottom:8}},
+        state.collections.map(col=>React.createElement('button',{key:col.id,onClick:()=>{setSelCol(col.id);setSelFolder('');},style:{padding:'6px 14px',borderRadius:10,fontSize:13,border:`1.5px solid ${selCol===col.id?'var(--accent)':'var(--border)'}`,background:selCol===col.id?'var(--accent)':'var(--surface)',color:selCol===col.id?'white':'var(--text)',cursor:'pointer',fontFamily:'var(--font-sans)',fontWeight:selCol===col.id?600:400,transition:'all 0.15s'}},col.name))
+      ),
+      folders.length>0&&React.createElement('div',{style:{display:'flex',flexWrap:'wrap',gap:6}},
+        React.createElement('button',{onClick:()=>setSelFolder(''),style:{padding:'4px 12px',borderRadius:8,fontSize:12,border:`1.5px solid ${!selFolder?'var(--accent)':'var(--border)'}`,background:!selFolder?'var(--accent-light)':'var(--surface)',color:!selFolder?'var(--accent-text)':'var(--text2)',cursor:'pointer',fontFamily:'var(--font-sans)',fontWeight:!selFolder?600:400}},'📁 Root'),
+        folders.map(f=>React.createElement('button',{key:f.id,onClick:()=>setSelFolder(f.id),style:{padding:'4px 12px',borderRadius:8,fontSize:12,border:`1.5px solid ${selFolder===f.id?'var(--accent)':'var(--border)'}`,background:selFolder===f.id?'var(--accent-light)':'var(--surface)',color:selFolder===f.id?'var(--accent-text)':'var(--text2)',cursor:'pointer',display:'flex',alignItems:'center',gap:4,fontFamily:'var(--font-sans)',fontWeight:selFolder===f.id?600:400}},React.createElement(IC.Folder,{s:11}),f.name))
+      )
+    ),
+
+    // Toolbar
+    !previewMode&&React.createElement('div',{style:{flexShrink:0,borderBottom:'1px solid var(--border)',background:'var(--surface)',position:'relative'}},
+      React.createElement('div',{className:'hide-scrollbar',style:{display:'flex',gap:2,padding:'6px 8px',overflowX:'auto',width:'max-content',maxWidth:'100%'}},
+        toolbar.map((t,i)=>React.createElement('button',{key:i,className:'editor-toolbar-btn',title:t.label,onClick:t.fn,style:{fontFamily:t.mono?'var(--font-mono)':'var(--font-sans)',fontStyle:t.style||'normal',fontWeight:t.w||'normal',minWidth:34}},t.label))
+      ),
+      React.createElement('div',{style:{position:'absolute',right:0,top:0,bottom:0,width:28,background:'linear-gradient(to right,transparent,var(--surface))',pointerEvents:'none'}})
+    ),
+
+    // Word count
+    React.createElement('div',{style:{flexShrink:0,padding:'4px 16px',display:'flex',gap:12,fontSize:12,color:'var(--text2)',borderBottom:'1px solid var(--border)',background:'var(--surface)'}},
+      React.createElement('span',null,`${words} words`),
+      mins>0&&React.createElement('span',null,`~${mins} min read`)
+    ),
+
+    // Content
+    React.createElement('div',{style:{flex:1,overflowY:'auto',background:'var(--surface)'}},
+      previewMode
+        ?React.createElement('div',{style:{padding:'16px 20px'}},React.createElement(MarkdownContent,{content:previewContent||'*Nothing to preview yet…*'}))
+        :React.createElement('textarea',{ref:taRef,className:'editor-area hide-scrollbar',style:{width:'100%',height:'100%',minHeight:'100%',padding:'16px',fontSize:14,background:'transparent'},placeholder:'Start writing in Markdown…\n\n# Heading\n**bold**, _italic_, `code`\n\n```js\nconst x = 1;\n```\n\n> Blockquote\n- Lists\n$$ E = mc^2 $$',value:content,onChange:e=>{setContent(e.target.value);markDirty();},spellCheck:true,autoCorrect:'on'})
+    ),
+
+    // Discard modal
+    showDiscard&&React.createElement('div',{className:'modal-backdrop',onClick:()=>setShowDiscard(false)},
+      React.createElement('div',{className:'modal-sheet',onClick:e=>e.stopPropagation()},
+        React.createElement('h2',{style:{fontSize:18,fontWeight:700,color:'var(--text)',marginBottom:8,fontFamily:'var(--font-serif)'}},existingNote?'Discard changes?':'Discard note?'),
+        React.createElement('p',{style:{fontSize:14,color:'var(--text2)',marginBottom:20}},existingNote?'Your unsaved changes will be lost.':'This note hasn\'t been saved yet. Leave anyway?'),
+        React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:8}},
+          React.createElement(Btn,{variant:'danger',style:{width:'100%'},onClick:()=>{setShowDiscard(false);dispatch({type:'BACK'});}},`Discard`),
+          React.createElement(Btn,{variant:'ghost',style:{width:'100%'},onClick:()=>setShowDiscard(false)},'Keep editing')
+        )
+      )
+    )
+  );
+}
+
+// ── READER ───────────────────────────────────────────────────
+function ReaderView(){
+  const{state,dispatch}=useApp();
+  const toast=useToast();
+  const params=state.navStack[state.navStack.length-1]?.params||{};
+  const note=state.notes.find(n=>n.id===params.noteId);
+
+  // Track last opened timestamp for "Recently opened" on dashboard
+  useEffect(()=>{ if(params.noteId) dispatch({type:'OPEN_NOTE',id:params.noteId}); },[params.noteId]);
+
+  const[localTheme,setLocalTheme]=useState(state.theme||'light');
+  const[fontSize,setFontSize]=useState(state.fontSize||18);
+  const[fontFamily,setFontFamily]=useState(state.fontFamily||'serif');
+  const[progress,setProgress]=useState(0);
+  const[immersive,setImmersive]=useState(false);
+  const[showTOC,setShowTOC]=useState(false);
+  const[showTypo,setShowTypo]=useState(false);
+  const[fabVisible,setFabVisible]=useState(true);
+  const scrollRef=useRef();
+  const lastScrollY=useRef(0);
+  const txStart=useRef(null);
+  const tyStart=useRef(null);
+  const globalTheme=useRef(state.theme);
+  // Debounce IDB scroll writes — avoids write on every scroll pixel
+  const scrollTopRef=useRef(0);
+  const scrollSaveTimer=useRef(null);
+
+  useEffect(()=>{setLocalTheme(state.theme||'light');},[state.theme]);
+  useEffect(()=>{setFontSize(state.fontSize||18);},[state.fontSize]);
+  useEffect(()=>{setFontFamily(state.fontFamily||'serif');},[state.fontFamily]);
+  useEffect(()=>{globalTheme.current=state.theme;},[state.theme]);
+
+  // hljs theme — cleanup on unmount
+  useEffect(()=>{
+    const L=document.getElementById('hljs-light');
+    const D=document.getElementById('hljs-dark');
+    if(L)L.disabled=localTheme==='dark';
+    if(D)D.disabled=localTheme!=='dark';
+    return()=>{const gt=globalTheme.current;if(L)L.disabled=gt==='dark';if(D)D.disabled=gt!=='dark';};
+  },[localTheme]);
+
+  // Restore reader scroll position
+  useEffect(()=>{
+    DB.get(`${IDB_SCROLL}_${params.noteId}`).then(pos=>{
+      if(pos&&scrollRef.current)requestAnimationFrame(()=>{if(scrollRef.current)scrollRef.current.scrollTop=pos;});
+    });
+  },[]);
+
+  function handleScroll(e){
+    const{scrollTop,scrollHeight,clientHeight}=e.currentTarget;
+    const p=scrollHeight>clientHeight?(scrollTop/(scrollHeight-clientHeight))*100:100;
+    setProgress(Math.min(100,Math.max(0,p)));
+    const delta=scrollTop-lastScrollY.current;
+    if(Math.abs(delta)>10)setFabVisible(delta<0||scrollTop<60);
+    lastScrollY.current=scrollTop;
+    // Debounced IDB write
+    scrollTopRef.current=scrollTop;
+    if(scrollSaveTimer.current)clearTimeout(scrollSaveTimer.current);
+    scrollSaveTimer.current=setTimeout(()=>{DB.set(`${IDB_SCROLL}_${params.noteId}`,scrollTopRef.current);},600);
+  }
+
+  function onTouchStart(e){txStart.current=e.touches[0].clientX;tyStart.current=e.touches[0].clientY;}
+  function onTouchEnd(e){
+    if(txStart.current===null)return;
+    const dx=e.changedTouches[0].clientX-txStart.current;
+    const dy=Math.abs(e.changedTouches[0].clientY-tyStart.current);
+    if(dx>70&&dy<50&&txStart.current<30)dispatch({type:'BACK'});
+    txStart.current=null;tyStart.current=null;
+  }
+  function onContentTap(e){
+    if(e.target.closest('a,button,input,pre,code,h1,h2,h3,h4,h5,h6'))return;
+    setImmersive(v=>!v);setFabVisible(true);
+  }
+
+  // TOC — strip code blocks first to avoid false heading matches
+  const toc=useMemo(()=>{
+    if(!note?.content)return[];
+    const stripped=note.content.replace(/```[\s\S]*?```/g,'').replace(/~~~[\s\S]*?~~~/g,'');
+    const idCount={};
+    return stripped.split('\n').flatMap(line=>{
+      const m=line.match(/^(#{1,6})\s+(.+)/);if(!m)return[];
+      const level=m[1].length;
+      const text=m[2].replace(/[*_`~\[\]]/g,'').trim();
+      let base=text.toLowerCase().replace(/[^\w\s-]+/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-+|-+$/g,'')||'h';
+      if(/^\d/.test(base))base='h-'+base;
+      idCount[base]=(idCount[base]||0)+1;
+      const id=idCount[base]>1?`${base}-${idCount[base]}`:base;
+      return[{level,text,id}];
+    });
+  },[note?.content]);
+
+  function scrollToHeading(id){
+    setShowTOC(false);
+    setTimeout(()=>{try{const el=scrollRef.current?.querySelector(`[id="${id}"]`);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}catch(_){}},220);
+  }
+
+  function applyTheme(t){setLocalTheme(t);dispatch({type:'SET',payload:{theme:t}});}
+  function applySize(s){setFontSize(s);dispatch({type:'SET',payload:{fontSize:s}});}
+  function applyFont(f){setFontFamily(f);dispatch({type:'SET',payload:{fontFamily:f}});}
+  function doCopyNote(){copyNote(note).then(ok=>{if(ok)toast('Copied to clipboard');else toast('Copy failed','error');});setShowTypo(false);}
+
+  if(!note)return React.createElement('div',{style:{padding:32,textAlign:'center',color:'var(--text2)'}},'Note not found');
+
+  const{words,mins}=getReadTime(note.content||'');
+  const minsLeft=Math.ceil(mins*(1-progress/100));
+  const progLabel=progress>=98?'Done ✓':progress<5?`~${mins} min`:`${Math.max(1,minsLeft)} min left`;
+  const themeClass=localTheme==='dark'?'theme-dark':localTheme==='sepia'?'theme-sepia':'';
+  const collection=state.collections.find(c=>c.id===note.collectionId);
+  const folder=note.folderId?state.folders.find(f=>f.id===note.folderId):null;
+  const breadcrumb=[collection?.name,folder?.name].filter(Boolean).join(' › ');
+
+  return React.createElement('div',{className:themeClass,style:{display:'flex',flexDirection:'column',height:'100%',background:'var(--bg)',color:'var(--text)'}},
+    // Progress bar (safe area aware)
+    React.createElement('div',{style:{position:'fixed',top:'env(safe-area-inset-top,0px)',left:0,height:2,width:`${progress}%`,background:'var(--accent)',zIndex:100,transition:'width 0.1s'}}),
+
+    // Header (hides in immersive)
+    React.createElement('div',{className:`reader-header safe-top${immersive?' immersive':''}`,style:{background:'var(--surface)',borderBottom:'1px solid var(--border)'}},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:4,padding:'0 12px 8px'}},
+        React.createElement('button',{style:{padding:10,borderRadius:12,border:'none',background:'none',cursor:'pointer',color:'var(--text2)',flexShrink:0},onClick:()=>dispatch({type:'BACK'})},React.createElement(IC.Back,{s:20})),
+        React.createElement('div',{style:{flex:1,minWidth:0,padding:'0 4px'}},
+          React.createElement('p',{style:{fontSize:14,fontWeight:600,color:'var(--text)',fontFamily:'var(--font-sans)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}},note.title),
+          React.createElement('p',{style:{fontSize:11,color:'var(--text2)'}},`${breadcrumb} · ${progLabel}`)
+        ),
+        // Circular progress
+        React.createElement('div',{style:{position:'relative',width:30,height:30,flexShrink:0}},
+          React.createElement('svg',{width:30,height:30,viewBox:'0 0 30 30',style:{transform:'rotate(-90deg)'}},
+            React.createElement('circle',{cx:15,cy:15,r:11,fill:'none',stroke:'var(--border)',strokeWidth:2.5}),
+            React.createElement('circle',{cx:15,cy:15,r:11,fill:'none',stroke:'var(--accent)',strokeWidth:2.5,strokeDasharray:`${2*Math.PI*11}`,strokeDashoffset:`${2*Math.PI*11*(1-progress/100)}`,strokeLinecap:'round',style:{transition:'stroke-dashoffset 0.2s'}})
+          ),
+          React.createElement('span',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:7,fontWeight:700,color:'var(--text2)',fontFamily:'var(--font-mono)'}},`${Math.round(progress)}%`)
+        )
+      )
+    ),
+
+    // Scroll content
+    React.createElement('div',{ref:scrollRef,style:{flex:1,overflowY:'auto',background:'var(--bg)'},onScroll:handleScroll,onTouchStart,onTouchEnd},
+      React.createElement('div',{style:{maxWidth:680,margin:'0 auto',padding:'28px 20px 160px'},onClick:onContentTap},
+        React.createElement('h1',{style:{fontSize:`${Math.round(fontSize*1.5)}px`,fontFamily:'var(--font-serif)',fontWeight:700,color:'var(--text)',lineHeight:1.25,marginBottom:8}},note.title),
+        React.createElement('div',{style:{display:'flex',gap:10,marginBottom:24,paddingBottom:18,borderBottom:'1px solid var(--border)',flexWrap:'wrap',alignItems:'center'}},
+          React.createElement('span',{style:{fontSize:12,color:'var(--text2)',fontFamily:'var(--font-sans)'}},fmtDate(note.modifiedAt||note.createdAt)),
+          React.createElement('span',{style:{fontSize:12,color:'var(--text2)',fontFamily:'var(--font-sans)'}},`${words} words · ~${mins} min`),
+          React.createElement('span',{style:{fontSize:11,color:'var(--accent-text)',background:'var(--accent-light)',padding:'2px 10px',borderRadius:20,fontFamily:'var(--font-sans)'}},breadcrumb)
+        ),
+        React.createElement(MarkdownContent,{content:note.content,fontFamily,fontSize,lineHeight:1.88}),
+        React.createElement('div',{style:{marginTop:60,paddingTop:24,borderTop:'1px solid var(--border)',textAlign:'center'}},
+          React.createElement('p',{style:{fontSize:13,fontStyle:'italic',color:'var(--text2)',fontFamily:'var(--font-serif)'}},'— End of note —'),
+          React.createElement('p',{style:{fontSize:11,color:'var(--text2)',marginTop:4}},`${words} words · ${mins} min read`)
+        )
+      )
+    ),
+
+    // FAB
+    React.createElement('div',{className:`reader-fab${fabVisible?'':' fab-hidden'}`},
+      React.createElement('div',{className:'reader-fab-inner'},
+        React.createElement('button',{className:'fab-btn',onClick:()=>dispatch({type:'BACK'})},React.createElement(IC.Back,{s:20}),React.createElement('span',null,'Back')),
+        React.createElement('button',{className:'fab-btn',onClick:()=>toc.length>0?setShowTOC(true):null,disabled:toc.length===0,style:{color:toc.length>0?'var(--text2)':'var(--border)'}},React.createElement(IC.Book,{s:20}),React.createElement('span',null,'TOC')),
+        React.createElement('button',{className:'fab-center-btn',onClick:()=>dispatch({type:'NAVIGATE',payload:{view:'editor',params:{noteId:note.id}}})},React.createElement(IC.Edit,{s:16}),'Edit'),
+        React.createElement('button',{className:'fab-btn',onClick:()=>setShowTypo(true)},React.createElement(IC.Type,{s:20}),React.createElement('span',null,'Aa')),
+        React.createElement('button',{className:`fab-btn${immersive?' fab-accent':''}`,onClick:()=>{setImmersive(v=>!v);setFabVisible(true);}},React.createElement(IC.Eye,{s:20}),React.createElement('span',null,immersive?'Exit':'Focus'))
+      )
+    ),
+
+    // TOC Sheet
+    showTOC&&React.createElement(React.Fragment,null,
+      React.createElement('div',{className:'sheet-backdrop',onClick:()=>setShowTOC(false)}),
+      React.createElement('div',{className:'sheet'},
+        React.createElement('div',{className:'sheet-handle'}),
+        React.createElement('div',{style:{padding:'0 20px 12px',display:'flex',justifyContent:'space-between',alignItems:'center'}},
+          React.createElement('p',{style:{fontWeight:700,fontSize:15,color:'var(--text)',fontFamily:'var(--font-sans)'}},'Table of Contents'),
+          React.createElement('button',{style:{color:'var(--text2)',padding:6,background:'none',border:'none',cursor:'pointer'},onClick:()=>setShowTOC(false)},React.createElement(IC.X,{s:18}))
+        ),
+        toc.length===0
+          ?React.createElement('p',{style:{padding:'12px 20px',color:'var(--text2)',fontSize:14}},'No headings found')
+          :toc.map((item,i)=>React.createElement('div',{key:i,className:`toc-item toc-h${item.level}`,style:{fontFamily:'var(--font-sans)'},onClick:()=>scrollToHeading(item.id)},
+              React.createElement('span',{style:{fontSize:10,color:'var(--text3)',fontFamily:'var(--font-mono)',minWidth:16}},`H${item.level}`),
+              React.createElement('span',null,item.text)
+            ))
+      )
+    ),
+
+    // Typography Sheet
+    showTypo&&React.createElement(React.Fragment,null,
+      React.createElement('div',{className:'sheet-backdrop',onClick:()=>setShowTypo(false)}),
+      React.createElement('div',{className:'sheet'},
+        React.createElement('div',{className:'sheet-handle'}),
+        React.createElement('div',{style:{padding:'0 20px 20px'}},
+          React.createElement('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}},
+            React.createElement('p',{style:{fontWeight:700,fontSize:15,color:'var(--text)',fontFamily:'var(--font-sans)'}},'Reading Options'),
+            React.createElement('button',{style:{color:'var(--text2)',padding:6,background:'none',border:'none',cursor:'pointer'},onClick:()=>setShowTypo(false)},React.createElement(IC.X,{s:18}))
+          ),
+          React.createElement(AppearancePicker,{theme:localTheme,fontSize,fontFamily,onTheme:applyTheme,onFontSize:applySize,onFontFamily:applyFont}),
+          React.createElement('button',{onClick:doCopyNote,style:{width:'100%',padding:13,borderRadius:12,border:'1px solid var(--border)',background:'var(--surface2)',color:'var(--text2)',fontSize:14,fontFamily:'var(--font-sans)',fontWeight:500,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:8,marginTop:8}},React.createElement(IC.Copy,{s:16}),'Copy note as plain text')
+        )
+      )
+    )
+  );
+}
+
+// ── SEARCH ───────────────────────────────────────────────────
+function SearchView(){
+  const{state,dispatch}=useApp();
+  const toast=useToast();
+  const[q,setQ]=useState('');
+  const[copiedId,setCopiedId]=useState(null);
+  const inputRef=useRef();
+  const scrollRef=useRef();
+  const SK='search';
+  useEffect(()=>{inputRef.current?.focus();},[]);
+  useEffect(()=>{const p=_scrollPos.get(SK);if(p&&scrollRef.current)scrollRef.current.scrollTop=p;},[]);
+
+  const results=useMemo(()=>{
+    if(!q.trim())return[];
+    const lq=q.toLowerCase();
+    return state.notes.filter(n=>n.title.toLowerCase().includes(lq)||n.content.toLowerCase().includes(lq)).slice(0,30);
+  },[q,state.notes]);
+
+  function hl(text,query){
+    if(!query||!text)return[text];
+    const esc=query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const parts=text.split(new RegExp(`(${esc})`,'gi'));
+    return parts.map((p,i)=>p.toLowerCase()===query.toLowerCase()?React.createElement('mark',{key:i},p):p);
+  }
+  async function doCopy(note,e){e.stopPropagation();const ok=await copyNote(note);if(ok){setCopiedId(note.id);setTimeout(()=>setCopiedId(x=>x===note.id?null:x),1500);}else toast('Copy failed','error');}
+
+  return React.createElement('div',{style:{display:'flex',flexDirection:'column',height:'100%',background:'var(--bg)'}},
+    React.createElement('div',{className:'safe-top',style:{background:'var(--surface)',borderBottom:'1px solid var(--border)',flexShrink:0,padding:'0 16px 12px'}},
+      React.createElement('h1',{style:{fontSize:26,fontWeight:700,color:'var(--text)',fontFamily:'var(--font-serif)',marginTop:8,marginBottom:12}},'Search'),
+      React.createElement('div',{style:{position:'relative'}},
+        React.createElement('div',{style:{position:'absolute',left:10,top:'50%',transform:'translateY(-50%)',color:'var(--text3)',pointerEvents:'none'}},React.createElement(IC.Search,{s:16})),
+        React.createElement('input',{ref:inputRef,className:'inp',style:{paddingLeft:34,paddingRight:14,paddingTop:12,paddingBottom:12,fontSize:14},placeholder:'Search all notes…',value:q,onChange:e=>setQ(e.target.value)})
+      )
+    ),
+    React.createElement('div',{ref:scrollRef,style:{flex:1,overflowY:'auto',padding:16},onScroll:e=>_scrollPos.set(SK,e.currentTarget.scrollTop)},
+      !q&&React.createElement('div',{style:{textAlign:'center',padding:'64px 0',color:'var(--text2)'}},
+        React.createElement(IC.Search,{s:48,style:{color:'var(--text3)',margin:'0 auto 12px',display:'block',opacity:0.4}}),
+        React.createElement('p',null,'Search across all your notes')
+      ),
+      q&&results.length===0&&React.createElement('div',{style:{textAlign:'center',padding:'64px 0',color:'var(--text2)'}},
+        React.createElement('p',{style:{fontSize:20,marginBottom:8}},'🔍'),
+        React.createElement('p',null,`No results for "${q}"`)
+      ),
+      results.length>0&&React.createElement('div',null,
+        React.createElement('p',{style:{fontSize:12,color:'var(--text2)',marginBottom:12}},`${results.length} result${results.length!==1?'s':''}`),
+        React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:8}},
+          results.map(note=>{
+            const col=state.collections.find(c=>c.id===note.collectionId);
+            const folder=note.folderId?state.folders.find(f=>f.id===note.folderId):null;
+            const lq=q.toLowerCase();
+            const ci=note.content.toLowerCase().indexOf(lq);
+            const snippet=ci>=0?note.content.slice(Math.max(0,ci-40),ci+120):note.content.slice(0,120);
+            const isCopied=copiedId===note.id;
+            return React.createElement('div',{key:note.id,style:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:20,padding:16,cursor:'pointer',transition:'box-shadow 0.15s'},onClick:()=>{dispatch({type:'OPEN_NOTE',id:note.id});dispatch({type:'NAVIGATE',payload:{view:'reader',params:{noteId:note.id}}}); }},
+              React.createElement('div',{style:{display:'flex',alignItems:'flex-start',gap:8}},
+                React.createElement('div',{style:{flex:1,minWidth:0}},
+                  React.createElement('p',{style:{fontWeight:600,color:'var(--text)',fontSize:15,fontFamily:'var(--font-serif)',lineHeight:1.3,marginBottom:4}},hl(note.title,q)),
+                  React.createElement('p',{style:{fontSize:12,color:'var(--text2)',marginBottom:6}},`${col?.name||''}${folder?` › ${folder.name}`:''} · ${fmtDate(note.modifiedAt||note.createdAt)}`),
+                  React.createElement('p',{style:{fontSize:13,color:'var(--text2)',lineHeight:1.5,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}},hl(snippet.replace(/[#*`_\[\]>~]/g,'').replace(/\n/g,' '),q))
+                ),
+                React.createElement('button',{style:{padding:8,borderRadius:10,border:'none',cursor:'pointer',flexShrink:0,background:isCopied?'var(--success-light)':'transparent',color:isCopied?'var(--success)':'var(--text3)',transition:'all 0.15s'},onClick:e=>doCopy(note,e),title:'Copy note'},React.createElement(isCopied?IC.Check:IC.Copy,{s:15}))
+              )
+            );
+          })
+        )
+      )
+    )
+  );
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────
+function SettingsView(){
+  const{state,dispatch}=useApp();
+  const toast=useToast();
+  const fileRef=useRef();
+  const scrollRef=useRef();
+  const SK='settings';
+  const[confirmClear,setConfirmClear]=useState(false);
+  useEffect(()=>{const p=_scrollPos.get(SK);if(p&&scrollRef.current)scrollRef.current.scrollTop=p;},[]);
+
+  const totalWords=useMemo(()=>state.notes.reduce((a,n)=>a+getWordCount(n.content),0),[state.notes]);
+
+  function doClear(){if(confirmClear){dispatch({type:'SET',payload:{collections:[],folders:[],notes:[]}});toast('All data cleared');setConfirmClear(false);}else{setConfirmClear(true);setTimeout(()=>setConfirmClear(false),5000);}}
+  function doExport(){const b={version:3,timestamp:Date.now(),collections:state.collections,folders:state.folders,notes:state.notes};const url=URL.createObjectURL(new Blob([JSON.stringify(b,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`lexicon_backup_${new Date().toISOString().split('T')[0]}.json`;a.click();URL.revokeObjectURL(url);toast('Exported');}
+  function doImport(e){const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!d.notes&&!d.collections)throw 0;dispatch({type:'IMPORT',data:d});toast(`Imported ${d.notes?.length||0} notes`);}catch{toast('Invalid file','error');}};r.readAsText(f);e.target.value='';}
+
+  const statRow=(label,val)=>React.createElement('div',{style:{display:'flex',justifyContent:'space-between',padding:'12px 0',borderBottom:'1px solid var(--border)'}},
+    React.createElement('span',{style:{fontSize:14,color:'var(--text2)'}},[label]),
+    React.createElement('span',{style:{fontSize:14,fontWeight:600,color:'var(--text)'}},[val])
+  );
+
+  const actionBtn=(icon,label,desc,onClick,danger=false,active=false)=>React.createElement('button',{style:{display:'flex',alignItems:'center',gap:12,padding:'14px 16px',borderRadius:14,border:'none',cursor:'pointer',background:active?'var(--danger)':danger?'var(--danger-light)':'var(--surface2)',color:active?'white':danger?'var(--danger)':'var(--text)',width:'100%',textAlign:'left',transition:'all 0.15s',fontFamily:'var(--font-sans)'},onClick},
+    React.createElement(icon,{s:18,style:{flexShrink:0}}),
+    React.createElement('div',null,
+      React.createElement('p',{style:{fontSize:14,fontWeight:500,margin:0}},label),
+      React.createElement('p',{style:{fontSize:12,opacity:0.7,margin:0,marginTop:1}},desc)
+    )
+  );
+
+  return React.createElement('div',{style:{display:'flex',flexDirection:'column',height:'100%',background:'var(--bg)'}},
+    React.createElement('div',{className:'safe-top',style:{background:'var(--surface)',borderBottom:'1px solid var(--border)',flexShrink:0,padding:'0 16px 12px'}},
+      React.createElement('h1',{style:{fontSize:26,fontWeight:700,color:'var(--text)',fontFamily:'var(--font-serif)',marginTop:8}},'Settings')
+    ),
+    React.createElement('div',{ref:scrollRef,style:{flex:1,overflowY:'auto',padding:16,display:'flex',flexDirection:'column',gap:16},onScroll:e=>_scrollPos.set(SK,e.currentTarget.scrollTop)},
+
+      // Appearance
+      React.createElement('div',{style:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:20,padding:20}},
+        React.createElement('h2',{style:{fontWeight:600,fontSize:15,color:'var(--text)',marginBottom:16}},'Appearance'),
+        React.createElement(AppearancePicker,{
+          theme:state.theme||'light',fontSize:state.fontSize||18,fontFamily:state.fontFamily||'serif',
+          onTheme:t=>dispatch({type:'SET',payload:{theme:t}}),
+          onFontSize:s=>dispatch({type:'SET',payload:{fontSize:s}}),
+          onFontFamily:f=>dispatch({type:'SET',payload:{fontFamily:f}})
+        })
+      ),
+
+      // Stats
+      React.createElement('div',{style:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:20,padding:20}},
+        React.createElement('h2',{style:{fontWeight:600,fontSize:15,color:'var(--text)',marginBottom:4}},'Library Stats'),
+        statRow('Collections',state.collections.length),
+        statRow('Folders',state.folders.length),
+        statRow('Notes',state.notes.length),
+        React.createElement('div',{style:{display:'flex',justifyContent:'space-between',padding:'12px 0'}},
+          React.createElement('span',{style:{fontSize:14,color:'var(--text2)'}},`Total words`),
+          React.createElement('span',{style:{fontSize:14,fontWeight:600,color:'var(--text)'}},totalWords.toLocaleString())
+        )
+      ),
+
+      // Data
+      React.createElement('div',{style:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:20,padding:16}},
+        React.createElement('h2',{style:{fontWeight:600,fontSize:15,color:'var(--text)',marginBottom:12}},'Data'),
+        React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:8}},
+          actionBtn(IC.Download,'Export Library','Download all data as JSON',doExport),
+          React.createElement('label',{style:{cursor:'pointer'}},
+            actionBtn(IC.Upload,'Import Backup','Merge notes from a JSON backup',()=>fileRef.current?.click()),
+            React.createElement('input',{ref:fileRef,type:'file',accept:'.json',style:{display:'none'},onChange:doImport})
+          ),
+          actionBtn(IC.Trash,confirmClear?'Tap again to confirm':'Clear All Data',confirmClear?'This cannot be undone!':'Delete everything from this device',doClear,true,confirmClear)
+        )
+      ),
+
+      // About
+      React.createElement('div',{style:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:20,padding:20}},
+        React.createElement('h2',{style:{fontWeight:600,fontSize:15,color:'var(--text)',marginBottom:8}},'About Lexicon'),
+        React.createElement('p',{style:{fontSize:14,color:'var(--text2)',lineHeight:1.6}},'Your personal reading and notes companion. All data stored locally — no account, no size limits, no ads.'),
+        React.createElement('p',{style:{fontSize:12,color:'var(--text3)',marginTop:8}},'v4.1 · Built for mobile · Open in any browser')
+      )
+    )
+  );
+}
+
+// ── APP ROOT ─────────────────────────────────────────────────
+function App(){
+  const[state,dispatch]=useReducer(reducer,defaultState);
+  const[ready,setReady]=useState(false);
+  const hydratedRef=useRef(false);
+  const navLenRef=useRef(1);
+
+  // Apply theme to <html> + theme-color meta
+  useEffect(()=>{
+    const cls=state.theme==='dark'?'theme-dark':state.theme==='sepia'?'theme-sepia':'';
+    document.documentElement.className=cls;
+    const colors={light:'#faf8f3',sepia:'#f5efe0',dark:'#141210'};
+    const meta=document.getElementById('theme-color-meta');
+    if(meta)meta.content=colors[state.theme]||colors.light;
+  },[state.theme]);
+
+  // Android back button support
+  useEffect(()=>{
+    window.history.replaceState({_lex:0},'');
+    const onPop=()=>{
+      if(navLenRef.current>1){dispatch({type:'BACK'});window.history.pushState({_lex:navLenRef.current},'');}
+    };
+    window.addEventListener('popstate',onPop);
+    return()=>window.removeEventListener('popstate',onPop);
+  },[]);
+  useEffect(()=>{navLenRef.current=state.navStack.length;},[state.navStack.length]);
+
+  // Storage init + migration
+  useEffect(()=>{
+    async function init(){
+      try{
+        let saved=await DB.get(IDB_KEY);
+        if(!saved){const raw=localStorage.getItem('lexicon_v3');if(raw){try{saved=JSON.parse(raw);await DB.set(IDB_KEY,saved);localStorage.removeItem('lexicon_v3');}catch(_){}}}
+        if(saved)dispatch({type:'HYDRATE',data:saved});
+      }catch{try{const raw=localStorage.getItem('lexicon_v3');if(raw)dispatch({type:'HYDRATE',data:JSON.parse(raw)});}catch(_){}}
+      hydratedRef.current=true;setReady(true);
+    }
+    init();
+  },[]);
+
+  // Debounced persistence
+  const dState=useDebounce(state,800);
+  useEffect(()=>{
+    if(!hydratedRef.current)return;
+    const{navStack,...persist}=dState;
+    DB.set(IDB_KEY,persist).then(ok=>{if(!ok)try{localStorage.setItem('lexicon_v3',JSON.stringify(persist));}catch(_){};});
+  },[dState]);
+
+  const enhDispatch=useCallback(action=>{
+    dispatch(action);
+    if(action.type==='NAVIGATE')window.history.pushState({_lex:(navLenRef.current||1)+1},'');
+  },[]);
+
+  const curNav=state.navStack[state.navStack.length-1]||{view:'dashboard',params:{}};
+  const curView=curNav.view;
+  const isRoot=['dashboard','search','settings'].includes(curView);
+
+  const views={dashboard:DashboardView,collection:CollectionView,editor:EditorView,reader:ReaderView,search:SearchView,settings:SettingsView};
+  const View=views[curView]||DashboardView;
+
+  // View key — unique per view+params so same-view navigations (Col A → Col B) remount fresh
+  // Cross-view navigations (DashboardView → CollectionView) also remount because it's a different component
+  // Scroll persistence is handled by _scrollPos Map (survives remounts)
+  const viewKey=`${curView}__${curNav.params?.collectionId||''}__${curNav.params?.noteId||''}__${curNav.params?.folderId||''}`;
+
+  function navTo(payload){
+    if(payload.view==='dashboard')enhDispatch({type:'RESET_NAV'});
+    else enhDispatch({type:'NAVIGATE',payload});
+  }
+
+  if(!ready)return React.createElement(AppCtx.Provider,{value:{state,dispatch:enhDispatch}},
+    React.createElement('div',{style:{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:'100%',background:'var(--bg)'}},
+      React.createElement('div',{style:{width:60,height:60,background:'var(--accent)',borderRadius:16,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:16,boxShadow:'0 4px 20px rgba(193,122,53,0.3)'}},
+        React.createElement('span',{style:{fontFamily:'Georgia,serif',fontSize:34,fontWeight:700,color:'white',lineHeight:1}},'L')
+      ),
+      React.createElement('p',{style:{fontFamily:'var(--font-sans)',color:'var(--text2)',fontSize:14}},'Loading Lexicon…')
+    )
+  );
+
+  return React.createElement(AppCtx.Provider,{value:{state,dispatch:enhDispatch}},
+    React.createElement(ToastProvider,null,
+      React.createElement('div',{style:{display:'flex',flexDirection:'column',height:'100%',background:'var(--bg)'}},
+        React.createElement('div',{key:viewKey,style:{flex:1,minHeight:0},className:!isRoot?'slide-enter':''},
+          React.createElement(View)
+        ),
+        isRoot&&React.createElement(BottomNav,{activeView:curView,onNavigate:navTo})
+      )
+    )
+  );
+}
+
+// ── PWA ──────────────────────────────────────────────────────
+function setupPWA(){
+  const manifest={name:'Lexicon',short_name:'Lexicon',start_url:'.',display:'standalone',background_color:'#faf8f3',theme_color:'#faf8f3',description:'Your personal reading and notes companion',icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%23c17a35'/%3E%3Ctext x='96' y='138' font-family='Georgia%2C serif' font-size='110' font-weight='700' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E",sizes:'192x192',type:'image/svg+xml',purpose:'any maskable'}]};
+  const ml=document.querySelector('link[rel="manifest"]')||document.createElement('link');
+  ml.rel='manifest';ml.href='data:application/manifest+json,'+encodeURIComponent(JSON.stringify(manifest));
+  document.head.appendChild(ml);
+
+  if('serviceWorker' in navigator){
+    const sw=`const C='lexicon-v5';const CDN=['cdn.jsdelivr.net','cdnjs.cloudflare.com','esm.sh','fonts.googleapis.com','fonts.gstatic.com'];
+self.addEventListener('install',e=>self.skipWaiting());
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim();});
+self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);const isCDN=CDN.some(h=>u.hostname.includes(h));if(isCDN){e.respondWith(caches.open(C).then(c=>c.match(e.request).then(cached=>{const fresh=fetch(e.request).then(r=>{if(r&&r.status===200)c.put(e.request,r.clone());return r;}).catch(()=>null);return cached||(fresh||new Response('',{status:503}));}).catch(()=>fetch(e.request))));}else{e.respondWith(fetch(e.request).then(r=>{if(r&&r.status===200)caches.open(C).then(c=>c.put(e.request,r.clone()));return r;}).catch(()=>caches.match(e.request)||new Response('Offline',{status:503})));}}`;
+    navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'text/javascript'}))).catch(()=>{});
+  }
+}
+
+initLibs().catch(console.error);
+setupPWA();
+createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
